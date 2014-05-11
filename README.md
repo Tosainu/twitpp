@@ -1,22 +1,6 @@
-# twitpp - A Twitter Library for C++
+# twitpp
+twitpp is a Twitter Library for C++11.  
+It's using Boost.Asio.
 
-## Usage
-
-### Set ConsumerKey
-    twitpp hoge("Consumer", "ConsumerSecret");
-
-or
-
-    twitpp fuga("Consumer", "ConsumerSecret", "OauthToken", "OauthTokenSecret");
-
-### Oauth Authentication
-    hoge.oauthGetAuthorizeUrl()
-    std::cout << hoge.authorizeUrl << std::endl;
-    hoge.oauthGetAccessToken("pin");
-
-### Post Status(Tweet)
-    hoge.update("Hello World!");
-
-## LICENCE
-* twitpp released under the [MIT license](LICENSE).
-
+## Copyright and License
+twitpp is licensed under the [MIT license](LICENSE).
