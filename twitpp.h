@@ -32,6 +32,7 @@ class twitpp {
   std::string authorizeUrl;
   int oauthGetAccessToken(const std::string& pin);
 
+  void showToken();
   int oauthGetRequest();
   int oauthPostRequest(const std::string& url, const std::string& param);
 

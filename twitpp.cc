@@ -205,6 +205,11 @@ int twitpp::oauthGetAccessToken(const std::string& pin) {
   return 0;
 }
 
+void twitpp::showToken() {
+  std::cout << oauthToken << std::endl;
+  std::cout << oauthTokenSecret << std::endl;
+}
+
 int twitpp::oauthGetRequest() {
   return 0;
 }
