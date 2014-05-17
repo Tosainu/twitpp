@@ -133,4 +133,110 @@ namespace twitpp {
     return 0;
   }
 
+  int OAuth::requestGet(const std::string& url, const std::map<std::string, std::string> parameters) {
+    // set parameters
+    std::map<std::string, std::string> params;
+    params["oauth_callback"] = "oob";
+    params["oauth_consumer_key"] = consumer_key_;
+    params["oauth_nonce"] = utility::randomStr(32);
+    params["oauth_signature_method"] = "HMAC-SHA1";
+    params["oauth_timestamp"] = utility::numToStr(std::time(0));
+    params["oauth_token"] = oauth_token_;
+    params["oauth_version"] = "1.0";
+
+    // generate post body
+    std::string post_body;
+    std::for_each(parameters.begin(), parameters.end(), [&](std::pair<const std::string, std::string> param) {
+        post_body += param.first + "=" + utility::urlEncode(param.second) + "&";
+        });
+    post_body.erase(post_body.end() - 1, post_body.end());
+
+    // generate signature_base
+    std::string signature_base;
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        signature_base += param.first + "=" + utility::urlEncode(param.second) + "&";
+        });
+    signature_base.erase(signature_base.end() - 1, signature_base.end());
+    signature_base = "GET&" + utility::urlEncode("https://api.twitter.com" + url) + "&" + utility::urlEncode(post_body + "&" + signature_base);
+    std::cout << signature_base << std::endl;
+
+    // generate signing key
+    std::string signing_key = utility::urlEncode(consumer_secret_) + "&" + utility::urlEncode(oauth_token_secret_);
+
+    // set oauth_signature
+    params["oauth_signature"] = utility::base64Encode(utility::hmacSha1(signing_key, signature_base));
+
+    // generate authorization_header
+    std::string authorization_header = "Authorization: OAuth ";
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        authorization_header += param.first + "=\"" + utility::urlEncode(param.second) + "\", ";
+        });
+    authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
+
+    // request token
+    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url + "?" + post_body, authorization_header);
+    io_service_.run();
+
+    io_service_.reset();
+
+    if(client.response_.status_code != 200) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  int OAuth::requestPost(const std::string& url, const std::map<std::string, std::string> parameters) {
+    // set parameters
+    std::map<std::string, std::string> params;
+    params["oauth_callback"] = "oob";
+    params["oauth_consumer_key"] = consumer_key_;
+    params["oauth_nonce"] = utility::randomStr(32);
+    params["oauth_signature_method"] = "HMAC-SHA1";
+    params["oauth_timestamp"] = utility::numToStr(std::time(0));
+    params["oauth_token"] = oauth_token_;
+    params["oauth_version"] = "1.0";
+    params.insert(parameters.begin(), parameters.end());
+
+    // generate signature_base
+    std::string signature_base;
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        signature_base += param.first + "=" + utility::urlEncode(param.second) + "&";
+        });
+    signature_base.erase(signature_base.end() - 1, signature_base.end());
+    signature_base = "POST&" + utility::urlEncode("https://api.twitter.com" + url) + "&" + utility::urlEncode(signature_base);
+
+    // generate signing key
+    std::string signing_key = utility::urlEncode(consumer_secret_) + "&" + utility::urlEncode(oauth_token_secret_);
+
+    // set oauth_signature
+    params["oauth_signature"] = utility::base64Encode(utility::hmacSha1(signing_key, signature_base));
+
+    // generate authorization_header
+    std::string authorization_header = "Authorization: OAuth ";
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        authorization_header += param.first + "=\"" + utility::urlEncode(param.second) + "\", ";
+        });
+    authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
+
+    // generate post body
+    std::string post_body;
+    std::for_each(parameters.begin(), parameters.end(), [&](std::pair<const std::string, std::string> param) {
+        post_body += param.first + "=" + utility::urlEncode(param.second) + "&";
+        });
+    post_body.erase(post_body.end() - 1, post_body.end());
+
+    // request token
+    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url, authorization_header, post_body);
+    io_service_.run();
+
+    io_service_.reset();
+
+    if(client.response_.status_code != 200) {
+      return 1;
+    }
+
+    return 0;
+  }
+
 }
