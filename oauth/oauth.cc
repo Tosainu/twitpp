@@ -133,7 +133,7 @@ namespace twitpp {
     return 0;
   }
 
-  int OAuth::requestGet(const std::string& url, const std::map<std::string, std::string> parameters) {
+  int OAuth::get(const std::string& url, const std::map<std::string, std::string> parameters) {
     // set parameters
     std::map<std::string, std::string> params;
     params["oauth_callback"] = "oob";
@@ -186,7 +186,7 @@ namespace twitpp {
     return 0;
   }
 
-  int OAuth::requestPost(const std::string& url, const std::map<std::string, std::string> parameters) {
+  int OAuth::post(const std::string& url, const std::map<std::string, std::string> parameters) {
     // set parameters
     std::map<std::string, std::string> params;
     params["oauth_callback"] = "oob";
