@@ -59,7 +59,8 @@ namespace twitpp {
     authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
     // request token
-    asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/request_token", authorization_header, "");
+    asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/request_token");
+    client.post(authorization_header, "");
     io_service_.run();
 
     io_service_.reset();
@@ -114,7 +115,8 @@ namespace twitpp {
     authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
     // request token
-    asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/access_token", authorization_header, "");
+    asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/access_token");
+    client.post(authorization_header, "");
     io_service_.run();
 
     io_service_.reset();
@@ -174,7 +176,8 @@ namespace twitpp {
     authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
     // request token
-    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url + "?" + post_body, authorization_header);
+    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url + "?" + post_body);
+    client.get(authorization_header);
     io_service_.run();
 
     io_service_.reset();
@@ -227,7 +230,8 @@ namespace twitpp {
     post_body.erase(post_body.end() - 1, post_body.end());
 
     // request token
-    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url, authorization_header, post_body);
+    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url);
+    client.post(authorization_header, post_body);
     io_service_.run();
 
     io_service_.reset();

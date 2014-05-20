@@ -7,58 +7,60 @@ namespace asioWrapper {
 
   namespace asio = boost::asio;
 
-  // GET method
   Client::Client(asio::io_service& io_service, asio::ssl::context& context,
-      const std::string& host, const std::string& path, const std::string& header)
-    : io_service_(io_service), resolver_(io_service), socket_(io_service, context) {
-      // create request;
-      std::ostream request_stream(&request_buffer_);
-      request_stream << "GET " << path << " HTTP/1.1\r\n";
-      request_stream << "Host: " << host << "\r\n";
-      request_stream << "Accept: */*\r\n";
-      if(!header.empty()) {
-        request_stream << header << "\r\n";
-      }
-      request_stream << "Connection: close\r\n\r\n";
+      const std::string& host, const std::string& path)
+    : io_service_(io_service), resolver_(io_service), socket_(io_service, context),
+    host_(host), path_(path) {}
 
-      // get server name and host info
-      asio::ip::tcp::resolver::query query(host, "443");
-      resolver_.async_resolve(query, boost::bind(&Client::handleResolve, this,
-            asio::placeholders::error, asio::placeholders::iterator));
+  // GET method
+  void Client::get(const std::string& header) {
+    // create request;
+    std::ostream request_stream(&request_buffer_);
+    request_stream << "GET " << path_ << " HTTP/1.1\r\n";
+    request_stream << "Host: " << host_ << "\r\n";
+    request_stream << "Accept: */*\r\n";
+    if(!header.empty()) {
+      request_stream << header << "\r\n";
+    }
+    request_stream << "Connection: close\r\n\r\n";
+
+    // get server name and host info
+    asio::ip::tcp::resolver::query query(host_, "443");
+    resolver_.async_resolve(query, boost::bind(&Client::handleResolve, this,
+          asio::placeholders::error, asio::placeholders::iterator));
   }
 
   // POST method
-  Client::Client(asio::io_service& io_service, asio::ssl::context& context,
-      const std::string& host, const std::string& path, const std::string& header, const std::string& data)
-    : io_service_(io_service), resolver_(io_service), socket_(io_service, context) {
-      // create request;
-      std::ostream request_stream(&request_buffer_);
-      request_stream << "POST " << path << " HTTP/1.1\r\n";
-      request_stream << "Host: " << host << "\r\n";
-      request_stream << "Accept: */*\r\n";
-      if(!header.empty()) {
-        request_stream << header << "\r\n";
-      }
-      if(!data.empty()) {
-        request_stream << "Content-Length: " << data.length() << "\r\n";
-        request_stream << "Content-Type: application/x-www-form-urlencoded\r\n";
-        request_stream << "Connection: close\r\n\r\n";
-        request_stream << data << "\r\n";
-      }
-      else {
-        request_stream << "Connection: close\r\n\r\n";
-      }
+  void Client::post(const std::string& header, const std::string& data) {
+    // create request;
+    std::ostream request_stream(&request_buffer_);
+    request_stream << "POST " << path_ << " HTTP/1.1\r\n";
+    request_stream << "Host: " << host_ << "\r\n";
+    request_stream << "Accept: */*\r\n";
+    if(!header.empty()) {
+      request_stream << header << "\r\n";
+    }
+    if(!data.empty()) {
+      request_stream << "Content-Length: " << data.length() << "\r\n";
+      request_stream << "Content-Type: application/x-www-form-urlencoded\r\n";
+      request_stream << "Connection: close\r\n\r\n";
+      request_stream << data << "\r\n";
+    }
+    else {
+      request_stream << "Connection: close\r\n\r\n";
+    }
 
-      // get server name and host info
-      asio::ip::tcp::resolver::query query(host, "443");
-      resolver_.async_resolve(query, boost::bind(&Client::handleResolve, this,
-            asio::placeholders::error, asio::placeholders::iterator));
+    // get server name and host info
+    asio::ip::tcp::resolver::query query(host_, "443");
+    resolver_.async_resolve(query, boost::bind(&Client::handleResolve, this,
+          asio::placeholders::error, asio::placeholders::iterator));
   }
 
-  void Client::handleResolve(const boost::system::error_code& error, asio::ip::tcp::resolver::iterator endpoint_iterator) {
+  void Client::handleResolve(const boost::system::error_code& error,
+      asio::ip::tcp::resolver::iterator endpoint_iterator) {
     if(!error) {
-      asio::async_connect(socket_.lowest_layer(), endpoint_iterator, boost::bind(&Client::handleConnect, this,
-            asio::placeholders::error));
+      asio::async_connect(socket_.lowest_layer(), endpoint_iterator,
+          boost::bind(&Client::handleConnect, this, asio::placeholders::error));
     }
     else {
       std::cout << "Error: " << error.message() << "\n";
@@ -67,8 +69,8 @@ namespace asioWrapper {
 
   void Client::handleConnect(const boost::system::error_code& error) {
     if(!error) {
-      socket_.async_handshake(asio::ssl::stream_base::client, boost::bind(&Client::handleHandshake, this,
-            asio::placeholders::error));
+      socket_.async_handshake(asio::ssl::stream_base::client,
+          boost::bind(&Client::handleHandshake, this, asio::placeholders::error));
     }
     else {
       std::cout << "Connect failed: " << error.message() << "\n";
@@ -77,8 +79,8 @@ namespace asioWrapper {
 
   void Client::handleHandshake(const boost::system::error_code& error) {
     if(!error) {
-      asio::async_write(socket_, request_buffer_, boost::bind(&Client::handleWrite, this,
-            asio::placeholders::error));
+      asio::async_write(socket_, request_buffer_,
+          boost::bind(&Client::handleWrite, this, asio::placeholders::error));
     }
     else {
       std::cout << "Handshake failed: " << error.message() << "\n";
@@ -87,8 +89,8 @@ namespace asioWrapper {
 
   void Client::handleWrite(const boost::system::error_code& error) {
     if(!error) {
-      asio::async_read_until(socket_, response_buffer_, "\r\n", boost::bind(&Client::handleReadStatus, this,
-            asio::placeholders::error));
+      asio::async_read_until(socket_, response_buffer_, "\r\n",
+          boost::bind(&Client::handleReadStatus, this, asio::placeholders::error));
     }
     else {
       std::cout << "Write failed: " << error.message() << "\n";
@@ -109,8 +111,8 @@ namespace asioWrapper {
       }
 
       // read response header
-      asio::async_read_until(socket_, response_buffer_, "\r\n\r\n", boost::bind(&Client::handleReadHeader, this,
-            asio::placeholders::error));
+      asio::async_read_until(socket_, response_buffer_, "\r\n\r\n",
+          boost::bind(&Client::handleReadHeader, this, asio::placeholders::error));
     }
     else {
       std::cout << "Read failed: " << error.message() << "\n";
