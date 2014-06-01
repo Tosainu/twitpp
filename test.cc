@@ -38,10 +38,12 @@ int main() {
   }
 
   // tweet
-  std::string a;
-  while(std::getline(std::cin, a)) {
-    std::map<std::string, std::string> pya;
-    pya["status"] = a;
-    std::cout << "=> " << oauth.post("/1.1/statuses/update.json", pya) << std::endl;
-  }
+  std::map<std::string, std::string> pya;
+  pya["status"] = "test";
+  std::cout << "=> " << oauth.post("api.twitter.com", "/1.1/statuses/update.json", pya) << std::endl;
+
+  // userstream
+  std::map<std::string, std::string> pya;
+  pya["status"] = "";
+  oauth.get("userstream.twitter.com", "/1.1/user.json", pya);
 }

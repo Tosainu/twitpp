@@ -58,9 +58,18 @@ namespace twitpp {
         });
     authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
-    // request token
+    // post
     asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/request_token");
-    client.post(authorization_header, "");
+    client.post(authorization_header, "", [&](std::string& text){
+        oauth_token_ = text;
+        oauth_token_secret_ = text;
+        oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
+        oauth_token_.erase(0, oauth_token_.find("token=", 0) + 6);
+        oauth_token_secret_.erase(oauth_token_secret_.find("&oauth_callback_confirmed=", 0));
+        oauth_token_secret_.erase(0, oauth_token_secret_.find("secret=", 0) + 7);
+
+        authorize_url_ = "https://api.twitter.com/oauth/authorize\?oauth_token=" + oauth_token_;
+        });
     io_service_.run();
 
     io_service_.reset();
@@ -68,15 +77,6 @@ namespace twitpp {
     if(client.response_.status_code != 200) {
       return 1;
     }
-
-    oauth_token_ = client.response_.response_body;
-    oauth_token_secret_ = client.response_.response_body;
-    oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
-    oauth_token_.erase(0, oauth_token_.find("token=", 0) + 6);
-    oauth_token_secret_.erase(oauth_token_secret_.find("&oauth_callback_confirmed=", 0));
-    oauth_token_secret_.erase(0, oauth_token_secret_.find("secret=", 0) + 7);
-
-    authorize_url_ = "https://api.twitter.com/oauth/authorize\?oauth_token=" + oauth_token_;
 
     return 0;
   }
@@ -114,9 +114,16 @@ namespace twitpp {
         });
     authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
-    // request token
+    // post
     asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/access_token");
-    client.post(authorization_header, "");
+    client.post(authorization_header, "", [&](std::string& text){
+        oauth_token_ = text;
+        oauth_token_secret_ = text;
+        oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
+        oauth_token_.erase(0, oauth_token_.find("token=", 0) + 6);
+        oauth_token_secret_.erase(oauth_token_secret_.find("&user_id=", 0));
+        oauth_token_secret_.erase(0, oauth_token_secret_.find("secret=", 0) + 7);
+        });
     io_service_.run();
 
     io_service_.reset();
@@ -125,17 +132,10 @@ namespace twitpp {
       return 1;
     }
 
-    oauth_token_ = client.response_.response_body;
-    oauth_token_secret_ = client.response_.response_body;
-    oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
-    oauth_token_.erase(0, oauth_token_.find("token=", 0) + 6);
-    oauth_token_secret_.erase(oauth_token_secret_.find("&user_id=", 0));
-    oauth_token_secret_.erase(0, oauth_token_secret_.find("secret=", 0) + 7);
-
     return 0;
   }
 
-  int OAuth::get(const std::string& url, const std::map<std::string, std::string> parameters) {
+  int OAuth::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters) {
     // set parameters
     std::map<std::string, std::string> params;
     params["oauth_callback"] = "oob";
@@ -159,7 +159,7 @@ namespace twitpp {
         signature_base += param.first + "=" + utility::urlEncode(param.second) + "&";
         });
     signature_base.erase(signature_base.end() - 1, signature_base.end());
-    signature_base = "GET&" + utility::urlEncode("https://api.twitter.com" + url) + "&" + utility::urlEncode(post_body + "&" + signature_base);
+    signature_base = "GET&" + utility::urlEncode("https://" + host + path) + "&" + utility::urlEncode(signature_base);
     std::cout << signature_base << std::endl;
 
     // generate signing key
@@ -175,9 +175,12 @@ namespace twitpp {
         });
     authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
-    // request token
-    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url + "?" + post_body);
-    client.get(authorization_header);
+    // get
+    asioWrapper::Client client(io_service_, context_, host, path);
+    client.get(authorization_header, [](std::string& text) {
+        std::cout << text<< std::endl;
+        text.assign("");
+        });
     io_service_.run();
 
     io_service_.reset();
@@ -189,7 +192,7 @@ namespace twitpp {
     return 0;
   }
 
-  int OAuth::post(const std::string& url, const std::map<std::string, std::string> parameters) {
+  int OAuth::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters) {
     // set parameters
     std::map<std::string, std::string> params;
     params["oauth_callback"] = "oob";
@@ -207,7 +210,7 @@ namespace twitpp {
         signature_base += param.first + "=" + utility::urlEncode(param.second) + "&";
         });
     signature_base.erase(signature_base.end() - 1, signature_base.end());
-    signature_base = "POST&" + utility::urlEncode("https://api.twitter.com" + url) + "&" + utility::urlEncode(signature_base);
+    signature_base = "POST&" + utility::urlEncode("https://" + host + path) + "&" + utility::urlEncode(signature_base);
 
     // generate signing key
     std::string signing_key = utility::urlEncode(consumer_secret_) + "&" + utility::urlEncode(oauth_token_secret_);
@@ -229,14 +232,18 @@ namespace twitpp {
         });
     post_body.erase(post_body.end() - 1, post_body.end());
 
-    // request token
-    asioWrapper::Client client(io_service_, context_, "api.twitter.com", url);
-    client.post(authorization_header, post_body);
+    // post
+    asioWrapper::Client client(io_service_, context_, host, path);
+    client.post(authorization_header, post_body, [](std::string& text){
+        std::cout << text<< std::endl;
+        text.assign("");
+        });
     io_service_.run();
 
     io_service_.reset();
 
     if(client.response_.status_code != 200) {
+      std::cout << client.response_.status_code << " ";
       return 1;
     }
 

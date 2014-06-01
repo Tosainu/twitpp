@@ -31,8 +31,8 @@ namespace twitpp {
       std::string authorize_url_;
       int getOAuthToken(const std::string& pin);
 
-      int get(const std::string& url, const std::map<std::string, std::string> parameters);
-      int post(const std::string& url, const std::map<std::string, std::string> parameters);
+      int get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters);
+      int post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters);
   };
 
 }
