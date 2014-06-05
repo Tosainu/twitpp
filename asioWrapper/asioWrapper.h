@@ -63,7 +63,7 @@ namespace asioWrapper {
         const qi::rule<std::string::const_iterator, unsigned int()> rule = qi::hex >> qi::lit("\r\n");
 
         std::string::const_iterator it = source.cbegin();
-        qi::parse(it,source.cend(), rule,chunk);
+        qi::parse(it, source.cend(), rule, chunk);
 
         return std::distance(source.cbegin(), it);
       }

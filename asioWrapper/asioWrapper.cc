@@ -167,15 +167,23 @@ namespace asioWrapper {
 
   void Client::handleReadChunkSize(const boost::system::error_code& error) {
     if(!error) {
-      // read chunk size
-      boost::system::error_code ec;
-      asio::read_until(socket_, response_buffer_, "\r\n", ec);
-      std::size_t chunk;
-      response_buffer_.consume(chunk_parser((std::string)boost::asio::buffer_cast<const char*>(response_buffer_.data()),chunk));
+      if (response_buffer_.size() == 0) {
+        return;
+      }
+      else if (response_buffer_.size() <= 2) {
+        asio::async_read_until(socket_, response_buffer_, "\r\n",
+            boost::bind(&Client::handleReadChunkSize, this, asio::placeholders::error));
+      }
+      else {
+        // read chunk size
+        boost::system::error_code ec;
+        asio::read_until(socket_, response_buffer_, "\r\n", ec);
+        std::size_t chunk;
+        response_buffer_.consume(chunk_parser((std::string)boost::asio::buffer_cast<const char*>(response_buffer_.data()), chunk));
 
-      asio::async_read(socket_, response_buffer_, asio::transfer_at_least(chunk - asio::buffer_size(response_buffer_.data())),
+        asio::async_read(socket_, response_buffer_, asio::transfer_at_least(chunk - asio::buffer_size(response_buffer_.data())),
             boost::bind(&Client::handleReadChunkBody, this, chunk, asio::placeholders::error));
-
+      }
     }
     else if(error != asio::error::eof) {
       std::cout << "Error: " << error.message() << "\n";

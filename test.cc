@@ -37,13 +37,18 @@ int main() {
     return 1;
   }
 
-  // tweet
+  // update
   std::map<std::string, std::string> pya;
-  pya["status"] = "test";
-  std::cout << "=> " << oauth.post("api.twitter.com", "/1.1/statuses/update.json", pya) << std::endl;
+  pya["status"] = "Myon !";
+  oauth.post("api.twitter.com", "/1.1/statuses/update.json", pya, [](std::string& text) {
+      std::cout << text<< std::endl;
+      text.assign("");
+      });
 
   // userstream
-  std::map<std::string, std::string> pya;
-  pya["status"] = "";
-  oauth.get("userstream.twitter.com", "/1.1/user.json", pya);
+  oauth.get("userstream.twitter.com", "/1.1/user.json", [](std::string& text) {
+      std::cout << text<< std::endl;
+      text.assign("");
+      });
+
 }

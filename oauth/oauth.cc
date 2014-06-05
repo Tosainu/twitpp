@@ -135,7 +135,7 @@ namespace twitpp {
     return 0;
   }
 
-  int OAuth::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters) {
+  int OAuth::get(const std::string& host, const std::string& path, std::function<void(std::string&)> handler) {
     // set parameters
     std::map<std::string, std::string> params;
     params["oauth_callback"] = "oob";
@@ -146,13 +146,6 @@ namespace twitpp {
     params["oauth_token"] = oauth_token_;
     params["oauth_version"] = "1.0";
 
-    // generate post body
-    std::string post_body;
-    std::for_each(parameters.begin(), parameters.end(), [&](std::pair<const std::string, std::string> param) {
-        post_body += param.first + "=" + utility::urlEncode(param.second) + "&";
-        });
-    post_body.erase(post_body.end() - 1, post_body.end());
-
     // generate signature_base
     std::string signature_base;
     std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
@@ -160,7 +153,6 @@ namespace twitpp {
         });
     signature_base.erase(signature_base.end() - 1, signature_base.end());
     signature_base = "GET&" + utility::urlEncode("https://" + host + path) + "&" + utility::urlEncode(signature_base);
-    std::cout << signature_base << std::endl;
 
     // generate signing key
     std::string signing_key = utility::urlEncode(consumer_secret_) + "&" + utility::urlEncode(oauth_token_secret_);
@@ -177,10 +169,7 @@ namespace twitpp {
 
     // get
     asioWrapper::Client client(io_service_, context_, host, path);
-    client.get(authorization_header, [](std::string& text) {
-        std::cout << text<< std::endl;
-        text.assign("");
-        });
+    client.get(authorization_header, handler);
     io_service_.run();
 
     io_service_.reset();
@@ -192,7 +181,109 @@ namespace twitpp {
     return 0;
   }
 
-  int OAuth::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters) {
+  int OAuth::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters, std::function<void(std::string&)> handler) {
+    // set parameters
+    std::map<std::string, std::string> params;
+    params["oauth_callback"] = "oob";
+    params["oauth_consumer_key"] = consumer_key_;
+    params["oauth_nonce"] = utility::randomStr(32);
+    params["oauth_signature_method"] = "HMAC-SHA1";
+    params["oauth_timestamp"] = utility::numToStr(std::time(0));
+    params["oauth_token"] = oauth_token_;
+    params["oauth_version"] = "1.0";
+    params.insert(parameters.begin(), parameters.end());
+
+    // generate post body
+    std::string post_body;
+    std::for_each(parameters.begin(), parameters.end(), [&](std::pair<const std::string, std::string> param) {
+        post_body += param.first + "=" + utility::urlEncode(param.second) + "&";
+        });
+    post_body.erase(post_body.end() - 1, post_body.end());
+
+    // generate signature_base
+    std::string signature_base;
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        signature_base += param.first + "=" + utility::urlEncode(param.second) + "&";
+        });
+    signature_base.erase(signature_base.end() - 1, signature_base.end());
+    signature_base = "GET&" + utility::urlEncode("https://" + host + path) + "&" + utility::urlEncode(signature_base);
+
+    // generate signing key
+    std::string signing_key = utility::urlEncode(consumer_secret_) + "&" + utility::urlEncode(oauth_token_secret_);
+
+    // set oauth_signature
+    params["oauth_signature"] = utility::base64Encode(utility::hmacSha1(signing_key, signature_base));
+
+    // generate authorization_header
+    std::string authorization_header = "Authorization: OAuth ";
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        authorization_header += param.first + "=\"" + utility::urlEncode(param.second) + "\", ";
+        });
+    authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
+
+    // get
+    asioWrapper::Client client(io_service_, context_, host, path + "?" + post_body);
+    client.get(authorization_header, handler);
+    io_service_.run();
+
+    io_service_.reset();
+
+    if(client.response_.status_code != 200) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  int OAuth::post(const std::string& host, const std::string& path, std::function<void(std::string&)> handler) {
+    // set parameters
+    std::map<std::string, std::string> params;
+    params["oauth_callback"] = "oob";
+    params["oauth_consumer_key"] = consumer_key_;
+    params["oauth_nonce"] = utility::randomStr(32);
+    params["oauth_signature_method"] = "HMAC-SHA1";
+    params["oauth_timestamp"] = utility::numToStr(std::time(0));
+    params["oauth_token"] = oauth_token_;
+    params["oauth_version"] = "1.0";
+
+    // generate signature_base
+    std::string signature_base;
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        signature_base += param.first + "=" + utility::urlEncode(param.second) + "&";
+        });
+    signature_base.erase(signature_base.end() - 1, signature_base.end());
+    signature_base = "POST&" + utility::urlEncode("https://" + host + path) + "&" + utility::urlEncode(signature_base);
+
+    // generate signing key
+    std::string signing_key = utility::urlEncode(consumer_secret_) + "&" + utility::urlEncode(oauth_token_secret_);
+
+    // set oauth_signature
+    params["oauth_signature"] = utility::base64Encode(utility::hmacSha1(signing_key, signature_base));
+
+    // generate authorization_header
+    std::string authorization_header = "Authorization: OAuth ";
+    std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+        authorization_header += param.first + "=\"" + utility::urlEncode(param.second) + "\", ";
+        });
+    authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
+
+    // post
+    asioWrapper::Client client(io_service_, context_, host, path);
+    client.post(authorization_header, "", handler);
+    io_service_.run();
+
+    io_service_.reset();
+
+    if(client.response_.status_code != 200) {
+      std::cout << client.response_.status_code << " ";
+      return 1;
+    }
+
+    return 0;
+  }
+
+
+  int OAuth::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters, std::function<void(std::string&)> handler) {
     // set parameters
     std::map<std::string, std::string> params;
     params["oauth_callback"] = "oob";
@@ -234,10 +325,7 @@ namespace twitpp {
 
     // post
     asioWrapper::Client client(io_service_, context_, host, path);
-    client.post(authorization_header, post_body, [](std::string& text){
-        std::cout << text<< std::endl;
-        text.assign("");
-        });
+    client.post(authorization_header, post_body, handler);
     io_service_.run();
 
     io_service_.reset();

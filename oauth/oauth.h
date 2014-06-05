@@ -1,6 +1,7 @@
 #ifndef TWITPP_OAUTH_H
 #define TWITPP_OAUTH_H
 
+#include <functional>
 #include <map>
 #include <string>
 #include <boost/asio.hpp>
@@ -31,8 +32,10 @@ namespace twitpp {
       std::string authorize_url_;
       int getOAuthToken(const std::string& pin);
 
-      int get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters);
-      int post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters);
+      int get(const std::string& host, const std::string& path, std::function<void(std::string&)> handler);
+      int get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters, std::function<void(std::string&)> handler);
+      int post(const std::string& host, const std::string& path, std::function<void(std::string&)> handler);
+      int post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters, std::function<void(std::string&)> handler);
   };
 
 }
