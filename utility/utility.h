@@ -2,8 +2,7 @@
 #define TWITPP_UTILITY_H
 
 #include "base64.h"
-#include "numToStr.h"
-#include "randomStr.h"
+#include "random_str.h"
 #include "sha1.h"
 #include "url.h"
 

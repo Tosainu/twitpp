@@ -6,6 +6,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include "../utility/utility.h"
 
 namespace twitpp {
 
@@ -20,6 +21,11 @@ namespace twitpp {
       std::string consumer_secret_;
       std::string oauth_token_;
       std::string oauth_token_secret_;
+
+      utility::RandomStr random_str_;
+      utility::Base64 base64_;
+      utility::Url url_;
+      utility::HmacSha1 hmac_sha1_;
 
     public:
       OAuth(asio::io_service& io_service, asio::ssl::context& context,

@@ -8,16 +8,12 @@
 namespace twitpp {
 namespace utility {
 
-  std::string hmacSha1(const std::string& key, const std::string& data) {
-    unsigned char* res;
+class HmacSha1 {
+public:
+  std::string encode(const std::string& key, const std::string& data);
+};
 
-    res = HMAC (EVP_sha1(), (const unsigned char*)key.c_str(), key.length(), (const unsigned char*)data.c_str(), data.length() , NULL, NULL);
-
-    std::string result((char*)res);
-    return result;
-  }
-
-}
-}
+} // utility
+} // twitpp
 
 #endif
