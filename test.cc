@@ -2,7 +2,7 @@
 #include <map>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include "twitpp.h"
+#include "oauth/oauth.h"
 
 int main() {
   namespace asio = boost::asio;
