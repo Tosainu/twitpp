@@ -1,7 +1,7 @@
 CXX=clang++
 CFLAGS=-O2 -std=c++11 -stdlib=libc++ -Wall -Wextra
-LDFLAGS=-lc++abi -lboost_system -lboost_thread -lcrypto -lssl -pthread
- 
+LDFLAGS=-Wl,-z,now,-z,relro -lc++abi -lboost_system -lpthread -lcrypto -lssl
+
 all: a.out
  
 a.out : test.o asioWrapper.o oauth.o base64.o random_str.o sha1.o url.o
