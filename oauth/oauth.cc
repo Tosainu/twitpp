@@ -54,7 +54,11 @@ int OAuth::getAuthorizeUrl() {
 
   // post
   asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/request_token");
-  client.post(authorization_header, "", [&](std::string& text) {
+  client.post(authorization_header, "", [&](int& status, std::string& text) {
+    if (status != 200) {
+      return;
+    }
+
     oauth_token_ = text;
     oauth_token_secret_ = text;
     oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
@@ -71,7 +75,6 @@ int OAuth::getAuthorizeUrl() {
   if (client.response_.status_code != 200) {
     return 1;
   }
-
   return 0;
 }
 
@@ -110,7 +113,11 @@ int OAuth::getOAuthToken(const std::string& pin) {
 
   // post
   asioWrapper::Client client(io_service_, context_, "api.twitter.com", "/oauth/access_token");
-  client.post(authorization_header, "", [&](std::string& text) {
+  client.post(authorization_header, "", [&](int& status, std::string& text) {
+    if (status != 200) {
+      return;
+    }
+
     oauth_token_ = text;
     oauth_token_secret_ = text;
     oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
@@ -125,11 +132,10 @@ int OAuth::getOAuthToken(const std::string& pin) {
   if (client.response_.status_code != 200) {
     return 1;
   }
-
   return 0;
 }
 
-int OAuth::get(const std::string& host, const std::string& path, std::function<void(std::string&)> handler) {
+void OAuth::get(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
   // set parameters
   std::map<std::string, std::string> params;
   params["oauth_callback"] = "oob";
@@ -167,16 +173,10 @@ int OAuth::get(const std::string& host, const std::string& path, std::function<v
   io_service_.run();
 
   io_service_.reset();
-
-  if (client.response_.status_code != 200) {
-    return 1;
-  }
-
-  return 0;
 }
 
-int OAuth::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
-               std::function<void(std::string&)> handler) {
+void OAuth::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
+               std::function<void(int&, std::string&)> handler) {
   // set parameters
   std::map<std::string, std::string> params;
   params["oauth_callback"] = "oob";
@@ -222,15 +222,9 @@ int OAuth::get(const std::string& host, const std::string& path, const std::map<
   io_service_.run();
 
   io_service_.reset();
-
-  if (client.response_.status_code != 200) {
-    return 1;
-  }
-
-  return 0;
 }
 
-int OAuth::post(const std::string& host, const std::string& path, std::function<void(std::string&)> handler) {
+void OAuth::post(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
   // set parameters
   std::map<std::string, std::string> params;
   params["oauth_callback"] = "oob";
@@ -268,17 +262,10 @@ int OAuth::post(const std::string& host, const std::string& path, std::function<
   io_service_.run();
 
   io_service_.reset();
-
-  if (client.response_.status_code != 200) {
-    std::cout << client.response_.status_code << " ";
-    return 1;
-  }
-
-  return 0;
 }
 
-int OAuth::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
-                std::function<void(std::string&)> handler) {
+void OAuth::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
+                std::function<void(int&, std::string&)> handler) {
   // set parameters
   std::map<std::string, std::string> params;
   params["oauth_callback"] = "oob";
@@ -324,12 +311,6 @@ int OAuth::post(const std::string& host, const std::string& path, const std::map
   io_service_.run();
 
   io_service_.reset();
-
-  if (client.response_.status_code != 200) {
-    std::cout << client.response_.status_code << " ";
-    return 1;
-  }
-
-  return 0;
 }
+
 }

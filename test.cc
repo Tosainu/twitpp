@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include "oauth/oauth.h"
+#include "asioWrapper/asioWrapper.h"
 
 int main() {
   namespace asio = boost::asio;
@@ -33,22 +34,32 @@ int main() {
     std::cout << "Authorization Succeeded !" << std::endl;
   }
   else {
-    std::cerr << "Error!" << std::endl;
+    std::cerr << "Error!!" << std::endl;
     return 1;
   }
 
   // update
   std::map<std::string, std::string> pya;
-  pya["status"] = "Myon !";
-  oauth.post("api.twitter.com", "/1.1/statuses/update.json", pya, [](std::string& text) {
-      std::cout << text<< std::endl;
-      text.assign("");
-      });
+  pya["status"] = "test";
+  oauth.post("api.twitter.com", "/1.1/statuses/update.json", pya, [](int& status, std::string& text) {
+    if (status != 200) {
+      std::cerr << "Error!!" << std::endl;
+      return;
+    }
+
+    std::cout << text << std::endl;
+    text.assign("");
+  });
 
   // userstream
-  oauth.get("userstream.twitter.com", "/1.1/user.json", [](std::string& text) {
-      std::cout << text<< std::endl;
-      text.assign("");
-      });
+  oauth.get("userstream.twitter.com", "/1.1/user.json", [](int& status, std::string& text) {
+    if (status != 200) {
+      std::cerr << "Error!!" << std::endl;
+      return;
+    }
+
+    std::cout << text << std::endl;
+    text.assign("");
+  });
 
 }

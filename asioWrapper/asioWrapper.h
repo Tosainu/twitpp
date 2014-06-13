@@ -15,7 +15,7 @@ namespace asio = boost::asio;
 
 struct Response {
   std::string http_version;
-  unsigned int status_code;
+  int status_code;
   std::string status_message;
   std::map<std::string, std::string> response_header;
   std::string response_body;
@@ -25,8 +25,8 @@ class Client {
 public:
   Client(asio::io_service& io_service, asio::ssl::context& context, const std::string& host, const std::string& path);
 
-  void get(const std::string& header, std::function<void(std::string&)> handler);
-  void post(const std::string& header, const std::string& data, std::function<void(std::string&)> handler);
+  void get(const std::string& header, std::function<void(int&, std::string&)> handler);
+  void post(const std::string& header, const std::string& data, std::function<void(int&, std::string&)> handler);
 
   Response response_;
 
@@ -40,7 +40,7 @@ private:
   asio::streambuf request_buffer_;
   asio::streambuf response_buffer_;
 
-  std::function<void(std::string&)> handler_;
+  std::function<void(int&, std::string&)> handler_;
 
   void handleResolve(const boost::system::error_code& err, asio::ip::tcp::resolver::iterator endpoint_iterator);
   void handleConnect(const boost::system::error_code& err);

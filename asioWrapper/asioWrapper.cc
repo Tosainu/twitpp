@@ -12,7 +12,7 @@ Client::Client(asio::io_service& io_service, asio::ssl::context& context, const 
     : resolver_(io_service), socket_(io_service, context), host_(host), path_(path) {}
 
 // GET method
-void Client::get(const std::string& header, std::function<void(std::string&)> handler) {
+void Client::get(const std::string& header, std::function<void(int&, std::string&)> handler) {
   handler_ = handler;
 
   // create request;
@@ -32,7 +32,7 @@ void Client::get(const std::string& header, std::function<void(std::string&)> ha
 }
 
 // POST method
-void Client::post(const std::string& header, const std::string& data, std::function<void(std::string&)> handler) {
+void Client::post(const std::string& header, const std::string& data, std::function<void(int&, std::string&)> handler) {
   handler_ = handler;
 
   // create request;
@@ -185,7 +185,7 @@ void Client::handleReadChunkBody(std::size_t content_length, const boost::system
 
     response_.response_body.append(boost::asio::buffer_cast<const char*>(response_buffer_.data()), content_length);
     response_buffer_.consume(content_length + 2);
-    handler_(response_.response_body);
+    handler_(response_.status_code, response_.response_body);
 
     asio::async_read_until(socket_, response_buffer_, "\r\n",
                            boost::bind(&Client::handleReadChunkSize, this, asio::placeholders::error));
@@ -198,7 +198,7 @@ void Client::handleReadContent(std::size_t content_length, const boost::system::
   if (!error) {
     response_.response_body.append(asio::buffers_begin(response_buffer_.data()), asio::buffers_end(response_buffer_.data()));
     response_buffer_.consume(response_buffer_.size());
-    handler_(response_.response_body);
+    handler_(response_.status_code, response_.response_body);
   } else if (error != asio::error::eof) {
     std::cout << "Read content failed: " << error.value() << "\n";
   }
@@ -209,7 +209,7 @@ void Client::handleReadContentAll(const boost::system::error_code& error) {
     std::ostringstream tmp;
     tmp << &response_buffer_;
     response_.response_body = tmp.str();
-    handler_(response_.response_body);
+    handler_(response_.status_code, response_.response_body);
 
     // Continue reading remaining data until EOF.
     asio::async_read(socket_, response_buffer_, asio::transfer_at_least(1),
