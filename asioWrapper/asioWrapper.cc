@@ -63,7 +63,7 @@ void Client::handleResolve(const boost::system::error_code& error, asio::ip::tcp
     asio::async_connect(socket_.lowest_layer(), endpoint_iterator,
                         boost::bind(&Client::handleConnect, this, asio::placeholders::error));
   } else {
-    std::cout << "Error: " << error.message() << "\n";
+    std::cout << "Resolve failed: " << error.value() << "\n";
   }
 }
 
@@ -72,7 +72,7 @@ void Client::handleConnect(const boost::system::error_code& error) {
     socket_.async_handshake(asio::ssl::stream_base::client,
                             boost::bind(&Client::handleHandshake, this, asio::placeholders::error));
   } else {
-    std::cout << "Connect failed: " << error.message() << "\n";
+    std::cout << "Connect failed: " << error.value() << "\n";
   }
 }
 
@@ -80,7 +80,7 @@ void Client::handleHandshake(const boost::system::error_code& error) {
   if (!error) {
     asio::async_write(socket_, request_buffer_, boost::bind(&Client::handleWrite, this, asio::placeholders::error));
   } else {
-    std::cout << "Handshake failed: " << error.message() << "\n";
+    std::cout << "Handshake failed: " << error.value()<< "\n";
   }
 }
 
@@ -89,7 +89,7 @@ void Client::handleWrite(const boost::system::error_code& error) {
     asio::async_read_until(socket_, response_buffer_, "\r\n",
                            boost::bind(&Client::handleReadStatus, this, asio::placeholders::error));
   } else {
-    std::cout << "Write failed: " << error.message() << "\n";
+    std::cout << "Write failed: " << error.value() << "\n";
   }
 }
 
@@ -110,7 +110,7 @@ void Client::handleReadStatus(const boost::system::error_code& error) {
     asio::async_read_until(socket_, response_buffer_, "\r\n\r\n",
                            boost::bind(&Client::handleReadHeader, this, asio::placeholders::error));
   } else {
-    std::cout << "Read failed: " << error.message() << "\n";
+    std::cout << "Read status failed: " << error.value() << "\n";
   }
 }
 
@@ -151,7 +151,7 @@ void Client::handleReadHeader(const boost::system::error_code& error) {
     }
 
   } else {
-    std::cout << "Error: " << error.message() << "\n";
+    std::cout << "Read header failed: " << error.value() << "\n";
   }
 }
 
@@ -173,7 +173,7 @@ void Client::handleReadChunkSize(const boost::system::error_code& error) {
                        boost::bind(&Client::handleReadChunkBody, this, chunk, asio::placeholders::error));
     }
   } else if (error != asio::error::eof) {
-    std::cout << "Error: " << error.message() << "\n";
+    std::cout << "Read chunksize failed: " << error.value() << "\n";
   }
 }
 
@@ -190,21 +190,17 @@ void Client::handleReadChunkBody(std::size_t content_length, const boost::system
     asio::async_read_until(socket_, response_buffer_, "\r\n",
                            boost::bind(&Client::handleReadChunkSize, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
-    std::cout << "Error: " << error.message() << "\n";
+    std::cout << "Read chunk failed: " << error.value() << "\n";
   }
 }
 
 void Client::handleReadContent(std::size_t content_length, const boost::system::error_code& error) {
   if (!error) {
-    if (response_buffer_.size() == 0) {
-      std::cout << "ERROR" << std::endl;
-    }
-
     response_.response_body.append(asio::buffers_begin(response_buffer_.data()), asio::buffers_end(response_buffer_.data()));
     response_buffer_.consume(response_buffer_.size());
     handler_(response_.response_body);
   } else if (error != asio::error::eof) {
-    std::cout << "Error: " << error.message() << "\n";
+    std::cout << "Read content failed: " << error.value() << "\n";
   }
 }
 
@@ -219,7 +215,7 @@ void Client::handleReadContentAll(const boost::system::error_code& error) {
     asio::async_read(socket_, response_buffer_, asio::transfer_at_least(1),
                      boost::bind(&Client::handleReadContentAll, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
-    std::cout << "Error: " << error.message() << "\n";
+    std::cout << "Read content all failed: " << error.value() << "\n";
   }
 }
 
