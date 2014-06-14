@@ -80,7 +80,7 @@ void Client::handleHandshake(const boost::system::error_code& error) {
   if (!error) {
     asio::async_write(socket_, request_buffer_, boost::bind(&Client::handleWrite, this, asio::placeholders::error));
   } else {
-    std::cout << "Handshake failed: " << error.value()<< "\n";
+    std::cout << "Handshake failed: " << error.value() << "\n";
   }
 }
 
@@ -164,13 +164,26 @@ void Client::handleReadChunkSize(const boost::system::error_code& error) {
                              boost::bind(&Client::handleReadChunkSize, this, asio::placeholders::error));
     } else {
       // read chunk size
-      boost::system::error_code ec;
-      asio::read_until(socket_, response_buffer_, "\r\n", ec);
-      std::size_t chunk;
-      response_buffer_.consume(chunk_parser((std::string)asio::buffer_cast<const char*>(response_buffer_.data()), chunk));
+      std::size_t chunk_size;
+      response_buffer_.consume(chunk_parser((std::string)asio::buffer_cast<const char*>(response_buffer_.data()), chunk_size));
 
-      asio::async_read(socket_, response_buffer_, asio::transfer_at_least(chunk - asio::buffer_size(response_buffer_.data())),
-                       boost::bind(&Client::handleReadChunkBody, this, chunk, asio::placeholders::error));
+      if (chunk_size == 0) {
+        // end
+        return;
+      } else if (chunk_size <= 2) {
+        // space only ?
+        boost::system::error_code ec;
+        asio::read(socket_, response_buffer_,
+                   asio::transfer_at_least((chunk_size + 2) - asio::buffer_size(response_buffer_.data())), ec);
+        response_buffer_.consume(chunk_size + 2);
+        asio::async_read_until(socket_, response_buffer_, "\r\n",
+                               boost::bind(&Client::handleReadChunkSize, this, asio::placeholders::error));
+      } else {
+        // read chunk
+        asio::async_read(socket_, response_buffer_,
+                         asio::transfer_at_least(chunk_size - asio::buffer_size(response_buffer_.data())),
+                         boost::bind(&Client::handleReadChunkBody, this, chunk_size, asio::placeholders::error));
+      }
     }
   } else if (error != asio::error::eof) {
     std::cout << "Read chunksize failed: " << error.value() << "\n";
@@ -218,6 +231,5 @@ void Client::handleReadContentAll(const boost::system::error_code& error) {
     std::cout << "Read content all failed: " << error.value() << "\n";
   }
 }
-
 }
 }
