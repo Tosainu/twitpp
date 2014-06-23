@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <ctime>
 #include <map>
 #include <string>
@@ -33,9 +32,9 @@ int OAuth::getAuthorizeUrl() {
 
   // generate signature_base
   std::string signature_base;
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     signature_base += param.first + "=" + url_.encode(param.second) + "&";
-  });
+  }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
   signature_base = "POST&" + url_.encode("https://api.twitter.com/oauth/request_token") + "&" + url_.encode(signature_base);
 
@@ -47,9 +46,9 @@ int OAuth::getAuthorizeUrl() {
 
   // generate authorization_header
   std::string authorization_header = "Authorization: OAuth ";
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     authorization_header += param.first + "=\"" + url_.encode(param.second) + "\", ";
-  });
+  }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
@@ -92,9 +91,9 @@ int OAuth::getOAuthToken(const std::string& pin) {
 
   // generate signature_base
   std::string signature_base;
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     signature_base += param.first + "=" + url_.encode(param.second) + "&";
-  });
+  }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
   signature_base = "POST&" + url_.encode("https://api.twitter.com/oauth/access_token") + "&" + url_.encode(signature_base);
 
@@ -106,9 +105,9 @@ int OAuth::getOAuthToken(const std::string& pin) {
 
   // generate authorization_header
   std::string authorization_header = "Authorization: OAuth ";
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     authorization_header += param.first + "=\"" + url_.encode(param.second) + "\", ";
-  });
+  }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
@@ -148,9 +147,9 @@ void OAuth::get(const std::string& host, const std::string& path, std::function<
 
   // generate signature_base
   std::string signature_base;
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     signature_base += param.first + "=" + url_.encode(param.second) + "&";
-  });
+  }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
   signature_base = "GET&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base);
 
@@ -162,9 +161,9 @@ void OAuth::get(const std::string& host, const std::string& path, std::function<
 
   // generate authorization_header
   std::string authorization_header = "Authorization: OAuth ";
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     authorization_header += param.first + "=\"" + url_.encode(param.second) + "\", ";
-  });
+  }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // get
@@ -197,9 +196,9 @@ void OAuth::get(const std::string& host, const std::string& path, const std::map
 
   // generate signature_base
   std::string signature_base;
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     signature_base += param.first + "=" + url_.encode(param.second) + "&";
-  });
+  }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
   signature_base = "GET&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base);
 
@@ -211,9 +210,9 @@ void OAuth::get(const std::string& host, const std::string& path, const std::map
 
   // generate authorization_header
   std::string authorization_header = "Authorization: OAuth ";
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     authorization_header += param.first + "=\"" + url_.encode(param.second) + "\", ";
-  });
+  }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // get
@@ -237,9 +236,9 @@ void OAuth::post(const std::string& host, const std::string& path, std::function
 
   // generate signature_base
   std::string signature_base;
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     signature_base += param.first + "=" + url_.encode(param.second) + "&";
-  });
+  }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
   signature_base = "POST&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base);
 
@@ -251,9 +250,9 @@ void OAuth::post(const std::string& host, const std::string& path, std::function
 
   // generate authorization_header
   std::string authorization_header = "Authorization: OAuth ";
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     authorization_header += param.first + "=\"" + url_.encode(param.second) + "\", ";
-  });
+  }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
@@ -279,9 +278,9 @@ void OAuth::post(const std::string& host, const std::string& path, const std::ma
 
   // generate signature_base
   std::string signature_base;
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     signature_base += param.first + "=" + url_.encode(param.second) + "&";
-  });
+  }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
   signature_base = "POST&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base);
 
@@ -293,9 +292,9 @@ void OAuth::post(const std::string& host, const std::string& path, const std::ma
 
   // generate authorization_header
   std::string authorization_header = "Authorization: OAuth ";
-  std::for_each(params.begin(), params.end(), [&](std::pair<const std::string, std::string> param) {
+  for (auto &param: params) {
     authorization_header += param.first + "=\"" + url_.encode(param.second) + "\", ";
-  });
+  }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // generate post body
