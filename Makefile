@@ -5,13 +5,14 @@ LDFLAGS=-Wl,-z,now,-z,relro
 LDLIBS=-lc++abi -lboost_system -lpthread -lcrypto -lssl
 
 SOURCES= \
-				 ./asioWrapper/asioWrapper.cc \
-				 ./oauth/oauth.cc \
-				 ./utility/base64.cc \
-				 ./utility/random_str.cc \
-				 ./utility/sha1.cc \
-				 ./utility/url.cc \
-				 ./test.cc
+	./asioWrapper/asioWrapper.cc \
+	./oauth/account.cc \
+	./oauth/oauth.cc \
+	./utility/base64.cc \
+	./utility/random_str.cc \
+	./utility/sha1.cc \
+	./utility/url.cc \
+	./test.cc
 
 OBJECTS = $(subst .cc,.o,$(SOURCES))
 

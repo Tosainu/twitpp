@@ -7,7 +7,7 @@
 namespace twitpp {
 namespace OAuth {
 
-class Account  {
+class Account {
 public:
   Account(const std::string& consumer_key, const std::string& consumer_secret);
   Account(const std::string& api_url, const std::string& consumer_key, const std::string& consumer_secret);

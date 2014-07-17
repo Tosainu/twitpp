@@ -11,15 +11,15 @@ namespace twitpp {
 namespace OAuth {
 
 Account::Account(const std::string& consumer_key, const std::string& consumer_secret)
-  : api_url_("api.twitter.com"), consumer_key_(consumer_key), consumer_secret_(consumer_secret) {}
+    : api_url_("api.twitter.com"), consumer_key_(consumer_key), consumer_secret_(consumer_secret) {}
 
 Account::Account(const std::string& api_url, const std::string& consumer_key, const std::string& consumer_secret)
-  : api_url_(api_url), consumer_key_(consumer_key), consumer_secret_(consumer_secret) {}
+    : api_url_(api_url), consumer_key_(consumer_key), consumer_secret_(consumer_secret) {}
 
 Account::Account(const std::string& consumer_key, const std::string& consumer_secret,
-                 const std::string& oauth_token, const std::string& oauth_token_secret)
-  : consumer_key_(consumer_key), consumer_secret_(consumer_secret),
-    oauth_token_(oauth_token), oauth_token_secret_(oauth_token_secret) {}
+    const std::string& oauth_token, const std::string& oauth_token_secret)
+    : consumer_key_(consumer_key), consumer_secret_(consumer_secret),
+      oauth_token_(oauth_token), oauth_token_secret_(oauth_token_secret) {}
 
 Account::~Account() {}
 
@@ -40,11 +40,12 @@ std::string Account::get_authorize_url() {
 
   // generate signature_base
   std::string signature_base;
-  for (auto&& param: authorization_param) {
+  for (auto&& param : authorization_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" + url_.encode("https://" + api_url_ + "/oauth/request_token") + "&" + url_.encode(signature_base));
+  signature_base.assign("POST&" + url_.encode("https://" + api_url_ + "/oauth/request_token") + "&" +
+                        url_.encode(signature_base));
 
   // generate signing key
   std::string signing_key(url_.encode(consumer_secret_) + "&");
@@ -54,7 +55,7 @@ std::string Account::get_authorize_url() {
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param: authorization_param) {
+  for (auto&& param : authorization_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
@@ -105,11 +106,12 @@ void Account::get_oauth_token(const std::string& pin) {
 
   // generate signature_base
   std::string signature_base;
-  for (auto &param: authorization_param) {
+  for (auto&& param : authorization_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" + url_.encode("https://" + api_url_ + "/oauth/access_token") + "&" + url_.encode(signature_base));
+  signature_base.assign("POST&" + url_.encode("https://" + api_url_ + "/oauth/access_token") + "&" +
+                        url_.encode(signature_base));
 
   // generate signing key
   std::string signing_key(url_.encode(consumer_secret_) + "&" + url_.encode(oauth_token_secret_));
@@ -119,7 +121,7 @@ void Account::get_oauth_token(const std::string& pin) {
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto &param: authorization_param) {
+  for (auto&& param : authorization_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());

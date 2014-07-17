@@ -2,27 +2,21 @@
 #include <map>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include "oauth/account.h"
 #include "oauth/oauth.h"
 #include "asioWrapper/asioWrapper.h"
 
 int main() {
   namespace asio = boost::asio;
-
   asio::io_service io_service;
   asio::ssl::context ctx(asio::ssl::context::tlsv12);
   ctx.set_verify_mode(asio::ssl::verify_none);
 
   // set consumer key
-  twitpp::OAuth oauth(io_service, ctx, "CONSUMER", "CONSUMER_SECRET");
+  twitpp::OAuth::Account account("CONSUMER", "CONSUMER_SECRET");
 
   // get authorization url
-  if(oauth.getAuthorizeUrl() == 0) {
-    std::cout << "Access " << oauth.authorize_url_ << std::endl;
-  }
-  else {
-    std::cerr << "Error!!" << std::endl;
-    return 1;
-  }
+  std::cout << account.get_authorize_url() << std::endl;
 
   // input pin
   std::string pin;
@@ -30,13 +24,9 @@ int main() {
   std::cin >> pin;
 
   // get oauth token
-  if(oauth.getOAuthToken(pin) == 0) {
-    std::cout << "Authorization Succeeded !" << std::endl;
-  }
-  else {
-    std::cerr << "Error!!" << std::endl;
-    return 1;
-  }
+  account.get_oauth_token(pin);
+
+  twitpp::OAuth::Client oauth(io_service, ctx, account);
 
   // update
   std::map<std::string, std::string> pya;
@@ -61,5 +51,4 @@ int main() {
     std::cout << text << std::endl;
     text.assign("");
   });
-
 }
