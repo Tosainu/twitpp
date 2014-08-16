@@ -9,7 +9,7 @@
 namespace twitpp {
 namespace utility {
 
-std::string HmacSha1::encode(const std::string& key, const std::string& data) {
+std::string hmac_sha1::encode(const std::string& key, const std::string& data) {
   unsigned char* res;
 
   res = HMAC(EVP_sha1(), (const unsigned char*)key.c_str(), key.length(),

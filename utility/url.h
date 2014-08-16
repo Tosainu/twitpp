@@ -6,7 +6,7 @@
 namespace twitpp {
 namespace utility {
 
-class Url {
+class url {
 public:
   std::string encode(const std::string& text);
 };

@@ -11,7 +11,7 @@
 namespace twitpp {
 namespace utility {
 
-class Base64 {
+class base64 {
 public:
   std::string encode(const std::string& text);
 };

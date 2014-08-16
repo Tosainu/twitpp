@@ -7,7 +7,7 @@
 namespace twitpp {
 namespace utility {
 
-std::string Base64::encode(const std::string& text) {
+std::string base64::encode(const std::string& text) {
   const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   std::string result;
 

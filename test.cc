@@ -13,7 +13,7 @@ int main() {
   ctx.set_verify_mode(asio::ssl::verify_none);
 
   // set consumer key
-  twitpp::OAuth::Account account("CONSUMER", "CONSUMER_SECRET");
+  twitpp::oauth::account account("CONSUMER", "CONSUMER_SECRET");
 
   // get authorization url
   std::cout << account.get_authorize_url() << std::endl;
@@ -26,7 +26,7 @@ int main() {
   // get oauth token
   account.get_oauth_token(pin);
 
-  twitpp::OAuth::Client oauth(io_service, ctx, account);
+  twitpp::oauth::client oauth(io_service, ctx, account);
 
   // update
   std::map<std::string, std::string> pya;

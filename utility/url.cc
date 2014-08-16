@@ -8,7 +8,7 @@
 namespace twitpp {
 namespace utility {
 
-std::string Url::encode(const std::string& text) {
+std::string url::encode(const std::string& text) {
   const std::string charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.~";
   std::ostringstream result;
 

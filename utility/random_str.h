@@ -7,7 +7,7 @@
 namespace twitpp {
 namespace utility {
 
-class RandomStr {
+class random_str {
 public:
   std::string operator()(unsigned int length);
 };

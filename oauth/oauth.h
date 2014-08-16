@@ -11,16 +11,16 @@
 #include "../utility/utility.h"
 
 namespace twitpp {
-namespace OAuth {
+namespace oauth {
 
-class Client {
+class client {
 public:
   typedef boost::asio::io_service io_service;
   typedef boost::asio::ssl::context context;
 
-  Client(io_service& io_service, context& context, Account& account);
+  client(io_service& io_service, context& context, account& ac);
 
-  ~Client();
+  ~client();
 
   void get(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler);
   void get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
@@ -30,15 +30,15 @@ public:
             std::function<void(int&, std::string&)> handler);
 
 private:
-  std::unique_ptr<Account> account_;
+  std::unique_ptr<account> account_;
 
   io_service& io_service_;
   context& context_;
 
-  utility::RandomStr random_str_;
-  utility::Base64 base64_;
-  utility::Url url_;
-  utility::HmacSha1 hmac_sha1_;
+  utility::random_str random_str_;
+  utility::base64 base64_;
+  utility::url url_;
+  utility::hmac_sha1 hmac_sha1_;
 };
 
 }

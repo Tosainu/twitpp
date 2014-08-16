@@ -5,16 +5,16 @@
 #include "../utility/utility.h"
 
 namespace twitpp {
-namespace OAuth {
+namespace oauth {
 
-class Account {
+class account {
 public:
-  Account(const std::string& consumer_key, const std::string& consumer_secret);
-  Account(const std::string& api_url, const std::string& consumer_key, const std::string& consumer_secret);
-  Account(const std::string& consumer_key, const std::string& consumer_secret,
+  account(const std::string& consumer_key, const std::string& consumer_secret);
+  account(const std::string& api_url, const std::string& consumer_key, const std::string& consumer_secret);
+  account(const std::string& consumer_key, const std::string& consumer_secret,
           const std::string& oauth_token, const std::string& oauth_token_secret);
 
-  ~Account();
+  ~account();
 
   std::string get_authorize_url();
   void get_oauth_token(const std::string& pin);
@@ -32,10 +32,10 @@ private:
   std::string oauth_token_;
   std::string oauth_token_secret_;
 
-  utility::RandomStr random_str_;
-  utility::Base64 base64_;
-  utility::Url url_;
-  utility::HmacSha1 hmac_sha1_;
+  utility::random_str random_str_;
+  utility::base64 base64_;
+  utility::url url_;
+  utility::hmac_sha1 hmac_sha1_;
 };
 
 }

@@ -13,7 +13,7 @@ namespace net {
 
 namespace asio = boost::asio;
 
-struct Response {
+struct response {
   std::string http_version;
   int status_code;
   std::string status_message;
@@ -21,14 +21,14 @@ struct Response {
   std::string response_body;
 };
 
-class Client {
+class async_client {
 public:
-  Client(asio::io_service& io_service, asio::ssl::context& context, const std::string& host, const std::string& path);
+  async_client(asio::io_service& io_service, asio::ssl::context& context, const std::string& host, const std::string& path);
 
   void get(const std::string& header, std::function<void(int&, std::string&)> handler);
   void post(const std::string& header, const std::string& data, std::function<void(int&, std::string&)> handler);
 
-  Response response_;
+  response response_;
 
 private:
   asio::ip::tcp::resolver resolver_;

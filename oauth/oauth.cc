@@ -9,14 +9,14 @@
 #include "../net/client.h"
 
 namespace twitpp {
-namespace OAuth {
+namespace oauth {
 
-Client::Client(io_service& io_service, context& context, Account& account)
-    : account_(new Account(account)), io_service_(io_service), context_(context) {}
+client::client(io_service& io_service, context& context, account& ac)
+    : account_(new account(ac)), io_service_(io_service), context_(context) {}
 
-Client::~Client() {}
+client::~client() {}
 
-void Client::get(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
+void client::get(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
   // set authorization_param
   std::map<std::string, std::string> authorization_param;
   authorization_param["oauth_callback"] = "oob";
@@ -49,14 +49,14 @@ void Client::get(const std::string& host, const std::string& path, std::function
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // get
-  net::Client client(io_service_, context_, host, path);
+  net::async_client client(io_service_, context_, host, path);
   client.get(authorization_header, handler);
   io_service_.run();
 
   io_service_.reset();
 }
 
-void Client::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
+void client::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
                  std::function<void(int&, std::string&)> handler) {
   // set authorization_param
   std::map<std::string, std::string> authorization_param;
@@ -98,14 +98,14 @@ void Client::get(const std::string& host, const std::string& path, const std::ma
   post_body.erase(post_body.end() - 1, post_body.end());
 
   // get
-  net::Client client(io_service_, context_, host, path + "?" + post_body);
+  net::async_client client(io_service_, context_, host, path + "?" + post_body);
   client.get(authorization_header, handler);
   io_service_.run();
 
   io_service_.reset();
 }
 
-void Client::post(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
+void client::post(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
   // set authorization_param
   std::map<std::string, std::string> authorization_param;
   authorization_param["oauth_callback"] = "oob";
@@ -138,14 +138,14 @@ void Client::post(const std::string& host, const std::string& path, std::functio
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  net::Client client(io_service_, context_, host, path);
+  net::async_client client(io_service_, context_, host, path);
   client.post(authorization_header, "", handler);
   io_service_.run();
 
   io_service_.reset();
 }
 
-void Client::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
+void client::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
                   std::function<void(int&, std::string&)> handler) {
   // set authorization_param
   std::map<std::string, std::string> authorization_param;
@@ -187,7 +187,7 @@ void Client::post(const std::string& host, const std::string& path, const std::m
   post_body.erase(post_body.end() - 1, post_body.end());
 
   // post
-  net::Client client(io_service_, context_, host, path);
+  net::async_client client(io_service_, context_, host, path);
   client.post(authorization_header, post_body, handler);
   io_service_.run();
 

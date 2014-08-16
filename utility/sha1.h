@@ -8,7 +8,7 @@
 namespace twitpp {
 namespace utility {
 
-class HmacSha1 {
+class hmac_sha1 {
 public:
   std::string encode(const std::string& key, const std::string& data);
 };

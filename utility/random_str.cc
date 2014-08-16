@@ -8,7 +8,7 @@
 namespace twitpp {
 namespace utility {
 
-std::string RandomStr::operator()(unsigned int length) {
+std::string random_str::operator()(unsigned int length) {
   const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   std::string result;
 

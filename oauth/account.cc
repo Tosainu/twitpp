@@ -8,22 +8,22 @@
 #include "../net/client.h"
 
 namespace twitpp {
-namespace OAuth {
+namespace oauth {
 
-Account::Account(const std::string& consumer_key, const std::string& consumer_secret)
+account::account(const std::string& consumer_key, const std::string& consumer_secret)
     : api_url_("api.twitter.com"), consumer_key_(consumer_key), consumer_secret_(consumer_secret) {}
 
-Account::Account(const std::string& api_url, const std::string& consumer_key, const std::string& consumer_secret)
+account::account(const std::string& api_url, const std::string& consumer_key, const std::string& consumer_secret)
     : api_url_(api_url), consumer_key_(consumer_key), consumer_secret_(consumer_secret) {}
 
-Account::Account(const std::string& consumer_key, const std::string& consumer_secret,
+account::account(const std::string& consumer_key, const std::string& consumer_secret,
     const std::string& oauth_token, const std::string& oauth_token_secret)
     : consumer_key_(consumer_key), consumer_secret_(consumer_secret),
       oauth_token_(oauth_token), oauth_token_secret_(oauth_token_secret) {}
 
-Account::~Account() {}
+account::~account() {}
 
-std::string Account::get_authorize_url() {
+std::string account::get_authorize_url() {
   // TODO change to sync connection
   boost::asio::io_service io_service;
   boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
@@ -62,7 +62,7 @@ std::string Account::get_authorize_url() {
 
   // post
   std::string authorize_url;
-  net::Client client(io_service, ctx, api_url_, "/oauth/request_token");
+  net::async_client client(io_service, ctx, api_url_, "/oauth/request_token");
   client.post(authorization_header, "", [&](int& status, std::string& text) {
     if (status != 200) {
       return;
@@ -87,7 +87,7 @@ std::string Account::get_authorize_url() {
   return authorize_url;
 }
 
-void Account::get_oauth_token(const std::string& pin) {
+void account::get_oauth_token(const std::string& pin) {
   // TODO change to sync connection
   boost::asio::io_service io_service;
   boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
@@ -127,7 +127,7 @@ void Account::get_oauth_token(const std::string& pin) {
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  net::Client client(io_service, ctx, api_url_, "/oauth/access_token");
+  net::async_client client(io_service, ctx, api_url_, "/oauth/access_token");
   client.post(authorization_header, "", [&](int& status, std::string& text) {
     if (status != 200) {
       return;
@@ -150,19 +150,19 @@ void Account::get_oauth_token(const std::string& pin) {
   // return 0;
 }
 
-std::string Account::get_consumer_key() const {
+std::string account::get_consumer_key() const {
   return consumer_key_;
 }
 
-std::string Account::get_consumer_secret() const {
+std::string account::get_consumer_secret() const {
   return consumer_secret_;
 }
 
-std::string Account::get_oauth_token() const {
+std::string account::get_oauth_token() const {
   return oauth_token_;
 }
 
-std::string Account::get_oauth_token_secret() const {
+std::string account::get_oauth_token_secret() const {
   return oauth_token_secret_;
 }
 
