@@ -5,7 +5,7 @@ LDFLAGS=-Wl,-z,now,-z,relro
 LDLIBS=-lc++abi -lboost_system -lpthread -lcrypto -lssl
 
 SOURCES= \
-	./asioWrapper/asioWrapper.cc \
+	./net/client.cc \
 	./oauth/account.cc \
 	./oauth/oauth.cc \
 	./utility/base64.cc \

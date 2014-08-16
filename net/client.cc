@@ -1,10 +1,10 @@
 #include <sstream>
 #include <string>
 #include <boost/lexical_cast.hpp>
-#include "asioWrapper.h"
+#include "client.h"
 
 namespace twitpp {
-namespace asioWrapper {
+namespace net {
 
 namespace asio = boost::asio;
 

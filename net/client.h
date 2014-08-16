@@ -1,5 +1,5 @@
-#ifndef TWITPP_ASIO_WRAPPER_H
-#define TWITPP_ASIO_WRAPPER_H
+#ifndef TWITPP_CLIENT_H
+#define TWITPP_CLIENT_H
 
 #include <string>
 #include <functional>
@@ -9,7 +9,7 @@
 #include <boost/spirit/include/qi.hpp>
 
 namespace twitpp {
-namespace asioWrapper {
+namespace net {
 
 namespace asio = boost::asio;
 

@@ -6,7 +6,7 @@
 #include <boost/lexical_cast.hpp>
 #include "account.h"
 #include "oauth.h"
-#include "../asioWrapper/asioWrapper.h"
+#include "../net/client.h"
 
 namespace twitpp {
 namespace OAuth {
@@ -49,7 +49,7 @@ void Client::get(const std::string& host, const std::string& path, std::function
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // get
-  asioWrapper::Client client(io_service_, context_, host, path);
+  net::Client client(io_service_, context_, host, path);
   client.get(authorization_header, handler);
   io_service_.run();
 
@@ -98,7 +98,7 @@ void Client::get(const std::string& host, const std::string& path, const std::ma
   post_body.erase(post_body.end() - 1, post_body.end());
 
   // get
-  asioWrapper::Client client(io_service_, context_, host, path + "?" + post_body);
+  net::Client client(io_service_, context_, host, path + "?" + post_body);
   client.get(authorization_header, handler);
   io_service_.run();
 
@@ -138,7 +138,7 @@ void Client::post(const std::string& host, const std::string& path, std::functio
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  asioWrapper::Client client(io_service_, context_, host, path);
+  net::Client client(io_service_, context_, host, path);
   client.post(authorization_header, "", handler);
   io_service_.run();
 
@@ -187,7 +187,7 @@ void Client::post(const std::string& host, const std::string& path, const std::m
   post_body.erase(post_body.end() - 1, post_body.end());
 
   // post
-  asioWrapper::Client client(io_service_, context_, host, path);
+  net::Client client(io_service_, context_, host, path);
   client.post(authorization_header, post_body, handler);
   io_service_.run();
 

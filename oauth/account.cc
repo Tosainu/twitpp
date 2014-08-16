@@ -5,7 +5,7 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/lexical_cast.hpp>
 #include "account.h"
-#include "../asioWrapper/asioWrapper.h"
+#include "../net/client.h"
 
 namespace twitpp {
 namespace OAuth {
@@ -62,7 +62,7 @@ std::string Account::get_authorize_url() {
 
   // post
   std::string authorize_url;
-  asioWrapper::Client client(io_service, ctx, api_url_, "/oauth/request_token");
+  net::Client client(io_service, ctx, api_url_, "/oauth/request_token");
   client.post(authorization_header, "", [&](int& status, std::string& text) {
     if (status != 200) {
       return;
@@ -127,7 +127,7 @@ void Account::get_oauth_token(const std::string& pin) {
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  asioWrapper::Client client(io_service, ctx, api_url_, "/oauth/access_token");
+  net::Client client(io_service, ctx, api_url_, "/oauth/access_token");
   client.post(authorization_header, "", [&](int& status, std::string& text) {
     if (status != 200) {
       return;
