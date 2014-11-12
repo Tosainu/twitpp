@@ -16,7 +16,12 @@ int main() {
   twitpp::oauth::account account("CONSUMER", "CONSUMER_SECRET");
 
   // get authorization url
-  std::cout << account.get_authorize_url() << std::endl;
+  if (account.get_authorize_url() == 0) {
+    std::cout << account.authorize_url() << std::endl;
+  } else {
+    std::cerr << "ERROR" << std::endl;
+    return -1;
+  }
 
   // input pin
   std::string pin;
@@ -24,7 +29,15 @@ int main() {
   std::cin >> pin;
 
   // get oauth token
-  account.get_oauth_token(pin);
+  if (account.get_oauth_token(pin) == 0) {
+    std::cout << "consumer_key:    " << account.consumer_key() << std::endl;
+    std::cout << "consumer_secret: " << account.consumer_secret() << std::endl;
+    std::cout << "oauth_token:     " << account.oauth_token() << std::endl;
+    std::cout << "oauth_secret:    " << account.oauth_token_secret() << std::endl;
+  } else {
+    std::cerr << "ERROR" << std::endl;
+    return -1;
+  }
 
   twitpp::oauth::client oauth(io_service, ctx, account);
 

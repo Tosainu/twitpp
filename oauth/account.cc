@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/xpressive/xpressive.hpp>
 #include "account.h"
 #include "../net/client.h"
 
@@ -23,7 +24,7 @@ account::account(const std::string& consumer_key, const std::string& consumer_se
 
 account::~account() {}
 
-std::string account::get_authorize_url() {
+int account::get_authorize_url() {
   // TODO change to sync connection
   boost::asio::io_service io_service;
   boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
@@ -61,33 +62,38 @@ std::string account::get_authorize_url() {
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  std::string authorize_url;
   net::async_client client(io_service, ctx, api_url_, "/oauth/request_token");
   client.post(authorization_header, "", [&](int& status, std::string& text) {
-    if (status != 200) {
-      return;
+    if (status == 200) {
+      authorize_url_.assign(text);
     }
-
-    oauth_token_.assign(text);
-    oauth_token_secret_.assign(text);
-    oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
-    oauth_token_.erase(0, oauth_token_.find("token=", 0) + 6);
-    oauth_token_secret_.erase(oauth_token_secret_.find("&oauth_callback_confirmed=", 0));
-    oauth_token_secret_.erase(0, oauth_token_secret_.find("secret=", 0) + 7);
-
-    authorize_url.assign("https://" + api_url_ + "/oauth/authorize\?oauth_token=" + oauth_token_);
   });
+
   io_service.run();
 
   io_service.reset();
 
-  // if (client.response_.status_code != 200) {
-  //   return 1;
-  // }
-  return authorize_url;
+  {
+    using namespace boost::xpressive;
+
+    sregex regex_token = "oauth_token=" >> (s1 = +_w) >> '&'
+                      >> "oauth_token_secret=" >> (s2 = +_w) >> '&'
+                      >> "oauth_callback_confirmed=" >> (s3 = +_w);
+
+    smatch token;
+    if (regex_match(authorize_url_, token, regex_token)) {
+      oauth_token_ = token[1];
+      oauth_token_secret_ = token[2];
+      authorize_url_.assign("https://" + api_url_ + "/oauth/authorize\?oauth_token=" + token[1]);
+      return 0;
+    } else {
+      authorize_url_.clear();
+      return -1;
+    }
+  }
 }
 
-void account::get_oauth_token(const std::string& pin) {
+int account::get_oauth_token(const std::string& pin) {
   // TODO change to sync connection
   boost::asio::io_service io_service;
   boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
@@ -127,42 +133,56 @@ void account::get_oauth_token(const std::string& pin) {
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
+  std::string response;
   net::async_client client(io_service, ctx, api_url_, "/oauth/access_token");
   client.post(authorization_header, "", [&](int& status, std::string& text) {
-    if (status != 200) {
-      return;
+    if (status == 200) {
+      response.assign(text);
     }
-
-    oauth_token_.assign(text);
-    oauth_token_secret_.assign(text);
-    oauth_token_.erase(oauth_token_.find("&oauth_token_secret=", 0));
-    oauth_token_.erase(0, oauth_token_.find("token=", 0) + 6);
-    oauth_token_secret_.erase(oauth_token_secret_.find("&user_id=", 0));
-    oauth_token_secret_.erase(0, oauth_token_secret_.find("secret=", 0) + 7);
   });
+
   io_service.run();
 
   io_service.reset();
 
-  // if (client.response_.status_code != 200) {
-  //   return 1;
-  // }
-  // return 0;
+  {
+    using namespace boost::xpressive;
+
+    sregex regex_token = "oauth_token=" >> (s1 = +set['-' | alnum]) >> '&'
+                      >> "oauth_token_secret=" >> (s2 = +_w) >> '&'
+                      >> "user_id=" >> (s3 = +_w) >> '&'
+                      >> "screen_name=" >> (s4 = +_w);
+
+    smatch token;
+    if (regex_match(response, token, regex_token)) {
+      oauth_token_ = token[1];
+      oauth_token_secret_ = token[2];
+      return 0;
+    } else {
+      oauth_token_.clear();
+      oauth_token_secret_.clear();
+      return -1;
+    }
+  }
 }
 
-std::string account::get_consumer_key() const {
+std::string account::authorize_url() {
+  return authorize_url_;
+}
+
+std::string account::consumer_key() const {
   return consumer_key_;
 }
 
-std::string account::get_consumer_secret() const {
+std::string account::consumer_secret() const {
   return consumer_secret_;
 }
 
-std::string account::get_oauth_token() const {
+std::string account::oauth_token() const {
   return oauth_token_;
 }
 
-std::string account::get_oauth_token_secret() const {
+std::string account::oauth_token_secret() const {
   return oauth_token_secret_;
 }
 

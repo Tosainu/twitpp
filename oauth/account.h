@@ -16,16 +16,19 @@ public:
 
   ~account();
 
-  std::string get_authorize_url();
-  void get_oauth_token(const std::string& pin);
+  int get_authorize_url();
+  int get_oauth_token(const std::string& pin);
 
-  std::string get_consumer_key() const;
-  std::string get_consumer_secret() const;
-  std::string get_oauth_token() const;
-  std::string get_oauth_token_secret() const;
+  std::string authorize_url();
+
+  std::string consumer_key() const;
+  std::string consumer_secret() const;
+  std::string oauth_token() const;
+  std::string oauth_token_secret() const;
 
 private:
   std::string api_url_;
+  std::string authorize_url_;
 
   std::string consumer_key_;
   std::string consumer_secret_;
