@@ -6,6 +6,7 @@ LDLIBS=-lc++abi -lboost_system -lpthread -lcrypto -lssl
 
 SOURCES= \
 	./net/async_client.cc \
+	./net/client.cc \
 	./oauth/account.cc \
 	./oauth/oauth.cc \
 	./utility/base64.cc \

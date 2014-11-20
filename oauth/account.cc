@@ -1,12 +1,10 @@
 #include <ctime>
 #include <map>
 #include <string>
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive.hpp>
+#include "../net/client.h"
 #include "account.h"
-#include "../net/async_client.h"
 
 namespace twitpp {
 namespace oauth {
@@ -25,11 +23,6 @@ account::account(const std::string& consumer_key, const std::string& consumer_se
 account::~account() {}
 
 int account::get_authorize_url() {
-  // TODO change to sync connection
-  boost::asio::io_service io_service;
-  boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
-  ctx.set_verify_mode(boost::asio::ssl::verify_none);
-
   // set authorization_param
   std::map<std::string, std::string> authorization_param;
   authorization_param["oauth_callback"] = "oob";
@@ -62,18 +55,11 @@ int account::get_authorize_url() {
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  net::async_client client(io_service, ctx, api_url_, "/oauth/request_token");
-  client.post(authorization_header, "", [&](int& status, std::string& text) {
-    if (status == 200) {
-      authorize_url_.assign(text);
-    }
-  });
+  try {
+    net::client client(net::method::POST, "https://" + api_url_ + "/oauth/request_token");
+    client.add_header(authorization_header);
+    client.run();
 
-  io_service.run();
-
-  io_service.reset();
-
-  {
     using namespace boost::xpressive;
 
     sregex regex_token = "oauth_token=" >> (s1 = +_w) >> '&'
@@ -81,24 +67,21 @@ int account::get_authorize_url() {
                       >> "oauth_callback_confirmed=" >> (s3 = +_w);
 
     smatch token;
-    if (regex_match(authorize_url_, token, regex_token)) {
-      oauth_token_ = token[1];
-      oauth_token_secret_ = token[2];
+    if (regex_match(client.response().response_body, token, regex_token)) {
+      oauth_token_.assign(token[1]);
+      oauth_token_secret_.assign(token[2]);
       authorize_url_.assign("https://" + api_url_ + "/oauth/authorize\?oauth_token=" + token[1]);
       return 0;
     } else {
       authorize_url_.clear();
       return -1;
     }
+  } catch (std::exception& e) {
+    throw e;
   }
 }
 
 int account::get_oauth_token(const std::string& pin) {
-  // TODO change to sync connection
-  boost::asio::io_service io_service;
-  boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
-  ctx.set_verify_mode(boost::asio::ssl::verify_none);
-
   // set authorization_param
   std::map<std::string, std::string> authorization_param;
   authorization_param["oauth_callback"] = "oob";
@@ -133,19 +116,11 @@ int account::get_oauth_token(const std::string& pin) {
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  std::string response;
-  net::async_client client(io_service, ctx, api_url_, "/oauth/access_token");
-  client.post(authorization_header, "", [&](int& status, std::string& text) {
-    if (status == 200) {
-      response.assign(text);
-    }
-  });
+  try {
+    net::client client(net::method::POST, "https://" + api_url_ + "/oauth/access_token");
+    client.add_header(authorization_header);
+    client.run();
 
-  io_service.run();
-
-  io_service.reset();
-
-  {
     using namespace boost::xpressive;
 
     sregex regex_token = "oauth_token=" >> (s1 = +set['-' | alnum]) >> '&'
@@ -154,15 +129,17 @@ int account::get_oauth_token(const std::string& pin) {
                       >> "screen_name=" >> (s4 = +_w);
 
     smatch token;
-    if (regex_match(response, token, regex_token)) {
-      oauth_token_ = token[1];
-      oauth_token_secret_ = token[2];
+    if (regex_match(client.response().response_body, token, regex_token)) {
+      oauth_token_.assign(token[1]);
+      oauth_token_secret_.assign(token[2]);
       return 0;
     } else {
       oauth_token_.clear();
       oauth_token_secret_.clear();
       return -1;
     }
+  } catch (std::exception& e) {
+    throw e;
   }
 }
 
