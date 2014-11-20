@@ -6,7 +6,7 @@
 #include <boost/lexical_cast.hpp>
 #include "account.h"
 #include "oauth.h"
-#include "../net/client.h"
+#include "../net/async_client.h"
 
 namespace twitpp {
 namespace oauth {
