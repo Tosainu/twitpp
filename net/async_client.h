@@ -7,19 +7,12 @@
 #include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include "response.h"
 
 namespace twitpp {
 namespace net {
 
 namespace asio = boost::asio;
-
-struct response {
-  std::string http_version;
-  int status_code;
-  std::string status_message;
-  std::map<std::string, std::string> response_header;
-  std::string response_body;
-};
 
 class async_client {
 public:
