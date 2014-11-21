@@ -1,10 +1,12 @@
-CXX=clang++
-CPPFLAGS=-O2 -Wall -Wextra
-CXXFLAGS=-std=c++11 -stdlib=libc++
-LDFLAGS=-Wl,-z,now,-z,relro
-LDLIBS=-lc++abi -lboost_system -lpthread -lcrypto -lssl
+CXX = g++
+CXXFLAGS = -std=c++11
+CPPFLAGS = -Wall -Wextra
+LDFLAGS = -Wl,-z,now,-z,relro
+LDLIBS = -lboost_system -lcrypto -lssl -pthread
 
-SOURCES= \
+TARGET = a.out
+
+SOURCES = \
 	./net/async_client.cc \
 	./net/client.cc \
 	./oauth/account.cc \
@@ -17,12 +19,11 @@ SOURCES= \
 
 OBJECTS = $(subst .cc,.o,$(SOURCES))
 
-test: $(OBJECTS)
+$(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-all: test
+all: $(TARGET)
 
 .PHONY: clean
 clean:
-	-rm test
-	-rm $(OBJECTS)
+	-@rm -fv $(TARGET) $(OBJECTS)
