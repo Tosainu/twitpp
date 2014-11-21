@@ -5,7 +5,7 @@
 namespace twitpp {
 namespace net {
 
-client::client(const method& method, const std::string& url)
+client::client(const net::method& method, const std::string& url)
   : io_service_(std::make_shared<boost::asio::io_service>()), context_(boost::asio::ssl::context_base::tlsv12),
     resolver_(*io_service_), request_stream_(&request_), response_(std::make_shared<net::response>()) {
   using namespace boost::xpressive;
@@ -32,10 +32,10 @@ client::client(const method& method, const std::string& url)
     }
 
     switch (method) {
-      case method::GET:
+      case net::method::GET:
         request_stream_ << "GET " << path << " HTTP/1.1\r\n";
         break;
-      case method::POST:
+      case net::method::POST:
         request_stream_ << "POST " << path << " HTTP/1.1\r\n";
         break;
     }

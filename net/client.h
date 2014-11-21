@@ -15,7 +15,7 @@ namespace net {
 
 class client {
 public:
-  client(const method& method, const std::string& url);
+  client(const net::method& method, const std::string& url);
 
   ~client();
 
