@@ -17,7 +17,7 @@ client::client(const net::method& method, const std::string& url)
     query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(res[2], res[1]);
 
     if (res[1] == "https") {
-      is_https = true;
+      is_https_ = true;
       context_.set_verify_mode(boost::asio::ssl::verify_none);
     }
 
@@ -70,7 +70,7 @@ void client::run() {
     request_stream_ << "Connection: close\r\n\r\n" << std::flush;
   }
 
-  if (is_https) {
+  if (is_https_) {
     connect_https();
   } else {
     connect_http();

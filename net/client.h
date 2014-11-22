@@ -45,7 +45,7 @@ private:
   std::ostream request_stream_;
 
   bool content_flag_ = false;
-  bool is_https = false;
+  bool is_https_ = false;
 
   std::shared_ptr<net::response> response_;
 };
