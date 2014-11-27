@@ -1,5 +1,5 @@
-#ifndef TWITPP_OAUTH_H
-#define TWITPP_OAUTH_H
+#ifndef TWITPP_OAUTH_OAUTH_H
+#define TWITPP_OAUTH_OAUTH_H
 
 #include <functional>
 #include <map>

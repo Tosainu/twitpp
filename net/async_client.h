@@ -1,5 +1,5 @@
-#ifndef TWITPP_CLIENT_H
-#define TWITPP_CLIENT_H
+#ifndef TWITPP_NET_ASYNC_CLIENT_H
+#define TWITPP_NET_ASYNC_CLIENT_H
 
 #include <string>
 #include <functional>
