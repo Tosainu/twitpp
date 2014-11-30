@@ -39,6 +39,8 @@ private:
   utility::base64 base64_;
   utility::url url_;
   utility::hmac_sha1 hmac_sha1_;
+
+  inline std::map<std::string, std::string> make_auth_param();
 };
 
 }

@@ -17,19 +17,11 @@ client::client(io_service& io_service, context& context, account& ac)
 client::~client() {}
 
 void client::get(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
-  // set authorization_param
-  std::map<std::string, std::string> authorization_param;
-  authorization_param["oauth_callback"] = "oob";
-  authorization_param["oauth_consumer_key"] = account_->consumer_key();
-  authorization_param["oauth_nonce"] = random_str_(32);
-  authorization_param["oauth_signature_method"] = "HMAC-SHA1";
-  authorization_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  authorization_param["oauth_token"] = account_->oauth_token();
-  authorization_param["oauth_version"] = "1.0";
+  auto auth_param = make_auth_param();
 
   // generate signature_base
   std::string signature_base;
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
@@ -39,11 +31,11 @@ void client::get(const std::string& host, const std::string& path, std::function
   std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  authorization_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
@@ -58,20 +50,12 @@ void client::get(const std::string& host, const std::string& path, std::function
 
 void client::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
                  std::function<void(int&, std::string&)> handler) {
-  // set authorization_param
-  std::map<std::string, std::string> authorization_param;
-  authorization_param["oauth_callback"] = "oob";
-  authorization_param["oauth_consumer_key"] = account_->consumer_key();
-  authorization_param["oauth_nonce"] = random_str_(32);
-  authorization_param["oauth_signature_method"] = "HMAC-SHA1";
-  authorization_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  authorization_param["oauth_token"] = account_->oauth_token();
-  authorization_param["oauth_version"] = "1.0";
-  authorization_param.insert(parameters.begin(), parameters.end());
+  auto auth_param = make_auth_param();
+  auth_param.insert(parameters.begin(), parameters.end());
 
   // generate signature_base
   std::string signature_base;
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
@@ -81,11 +65,11 @@ void client::get(const std::string& host, const std::string& path, const std::ma
   std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  authorization_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
@@ -106,19 +90,11 @@ void client::get(const std::string& host, const std::string& path, const std::ma
 }
 
 void client::post(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
-  // set authorization_param
-  std::map<std::string, std::string> authorization_param;
-  authorization_param["oauth_callback"] = "oob";
-  authorization_param["oauth_consumer_key"] = account_->consumer_key();
-  authorization_param["oauth_nonce"] = random_str_(32);
-  authorization_param["oauth_signature_method"] = "HMAC-SHA1";
-  authorization_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  authorization_param["oauth_token"] = account_->oauth_token();
-  authorization_param["oauth_version"] = "1.0";
+  auto auth_param = make_auth_param();
 
   // generate signature_base
   std::string signature_base;
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
@@ -128,11 +104,11 @@ void client::post(const std::string& host, const std::string& path, std::functio
   std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  authorization_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
@@ -147,20 +123,12 @@ void client::post(const std::string& host, const std::string& path, std::functio
 
 void client::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
                   std::function<void(int&, std::string&)> handler) {
-  // set authorization_param
-  std::map<std::string, std::string> authorization_param;
-  authorization_param["oauth_callback"] = "oob";
-  authorization_param["oauth_consumer_key"] = account_->consumer_key();
-  authorization_param["oauth_nonce"] = random_str_(32);
-  authorization_param["oauth_signature_method"] = "HMAC-SHA1";
-  authorization_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  authorization_param["oauth_token"] = account_->oauth_token();
-  authorization_param["oauth_version"] = "1.0";
-  authorization_param.insert(parameters.begin(), parameters.end());
+  auto auth_param = make_auth_param();
+  auth_param.insert(parameters.begin(), parameters.end());
 
   // generate signature_base
   std::string signature_base;
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
@@ -170,11 +138,11 @@ void client::post(const std::string& host, const std::string& path, const std::m
   std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  authorization_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
@@ -192,6 +160,19 @@ void client::post(const std::string& host, const std::string& path, const std::m
   io_service_.run();
 
   io_service_.reset();
+}
+
+inline std::map<std::string, std::string> client::make_auth_param() {
+  std::map<std::string, std::string> auth_param;
+  auth_param["oauth_callback"] = "oob";
+  auth_param["oauth_consumer_key"] = account_->consumer_key();
+  auth_param["oauth_nonce"] = random_str_(32);
+  auth_param["oauth_signature_method"] = "HMAC-SHA1";
+  auth_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
+  auth_param["oauth_token"] = account_->oauth_token();
+  auth_param["oauth_version"] = "1.0";
+
+  return auth_param;
 }
 
 }

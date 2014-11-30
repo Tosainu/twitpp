@@ -23,18 +23,11 @@ account::account(const std::string& consumer_key, const std::string& consumer_se
 account::~account() {}
 
 int account::get_authorize_url() {
-  // set authorization_param
-  std::map<std::string, std::string> authorization_param;
-  authorization_param["oauth_callback"] = "oob";
-  authorization_param["oauth_consumer_key"] = consumer_key_;
-  authorization_param["oauth_nonce"] = random_str_(32);
-  authorization_param["oauth_signature_method"] = "HMAC-SHA1";
-  authorization_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  authorization_param["oauth_version"] = "1.0";
+  auto auth_param = make_auth_param();
 
   // generate signature_base
   std::string signature_base;
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
@@ -45,11 +38,11 @@ int account::get_authorize_url() {
   std::string signing_key(url_.encode(consumer_secret_) + "&");
 
   // set oauth_signature
-  authorization_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
@@ -82,20 +75,12 @@ int account::get_authorize_url() {
 }
 
 int account::get_oauth_token(const std::string& pin) {
-  // set authorization_param
-  std::map<std::string, std::string> authorization_param;
-  authorization_param["oauth_callback"] = "oob";
-  authorization_param["oauth_consumer_key"] = consumer_key_;
-  authorization_param["oauth_nonce"] = random_str_(32);
-  authorization_param["oauth_signature_method"] = "HMAC-SHA1";
-  authorization_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  authorization_param["oauth_token"] = oauth_token_;
-  authorization_param["oauth_verifier"] = pin;
-  authorization_param["oauth_version"] = "1.0";
+  auto auth_param = make_auth_param();
+  auth_param["oauth_verifier"] = pin;
 
   // generate signature_base
   std::string signature_base;
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
@@ -106,11 +91,11 @@ int account::get_oauth_token(const std::string& pin) {
   std::string signing_key(url_.encode(consumer_secret_) + "&" + url_.encode(oauth_token_secret_));
 
   // set oauth_signature
-  authorization_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : authorization_param) {
+  for (auto&& param : auth_param) {
     authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
@@ -161,6 +146,22 @@ std::string account::oauth_token() const {
 
 std::string account::oauth_token_secret() const {
   return oauth_token_secret_;
+}
+
+inline std::map<std::string, std::string> account::make_auth_param() {
+  std::map<std::string, std::string> auth_param;
+  auth_param["oauth_callback"] = "oob";
+  auth_param["oauth_consumer_key"] = consumer_key_;
+  auth_param["oauth_nonce"] = random_str_(32);
+  auth_param["oauth_signature_method"] = "HMAC-SHA1";
+  auth_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
+  auth_param["oauth_version"] = "1.0";
+
+  if (!oauth_token_.empty()) {
+    auth_param["oauth_token"] = oauth_token_;
+  }
+
+  return auth_param;
 }
 
 }
