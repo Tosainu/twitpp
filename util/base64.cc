@@ -2,12 +2,12 @@
 #define TWITPP_UTILITY_BASE64_CC
 
 #include <string>
-#include "base64.h"
+#include "util.h"
 
 namespace twitpp {
-namespace utility {
+namespace util {
 
-std::string base64::encode(const std::string& text) {
+std::string base64_encode(const std::string& text) {
   const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   std::string result;
 

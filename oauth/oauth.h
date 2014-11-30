@@ -8,7 +8,6 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include "account.h"
-#include "../utility/utility.h"
 
 namespace twitpp {
 namespace oauth {
@@ -34,11 +33,6 @@ private:
 
   io_service& io_service_;
   context& context_;
-
-  utility::random_str random_str_;
-  utility::base64 base64_;
-  utility::url url_;
-  utility::hmac_sha1 hmac_sha1_;
 
   inline std::map<std::string, std::string> make_auth_param();
 };

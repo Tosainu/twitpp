@@ -4,9 +4,10 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/lexical_cast.hpp>
+#include "../net/async_client.h"
+#include "../util/util.h"
 #include "account.h"
 #include "oauth.h"
-#include "../net/async_client.h"
 
 namespace twitpp {
 namespace oauth {
@@ -22,21 +23,21 @@ void client::get(const std::string& host, const std::string& path, std::function
   // generate signature_base
   std::string signature_base;
   for (auto&& param : auth_param) {
-    signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
+    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("GET&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base));
+  signature_base.assign("GET&" + util::url_encode("https://" + host + path) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
   for (auto&& param : auth_param) {
-    authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
+    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
@@ -56,28 +57,28 @@ void client::get(const std::string& host, const std::string& path, const std::ma
   // generate signature_base
   std::string signature_base;
   for (auto&& param : auth_param) {
-    signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
+    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("GET&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base));
+  signature_base.assign("GET&" + util::url_encode("https://" + host + path) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
   for (auto&& param : auth_param) {
-    authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
+    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // generate post_body
   std::string post_body;
   for (auto&& param : parameters) {
-    post_body.append(param.first + "=" + url_.encode(param.second) + "&");
+    post_body.append(param.first + "=" + util::url_encode(param.second) + "&");
   };
   post_body.erase(post_body.end() - 1, post_body.end());
 
@@ -95,21 +96,21 @@ void client::post(const std::string& host, const std::string& path, std::functio
   // generate signature_base
   std::string signature_base;
   for (auto&& param : auth_param) {
-    signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
+    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base));
+  signature_base.assign("POST&" + util::url_encode("https://" + host + path) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
   for (auto&& param : auth_param) {
-    authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
+    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
@@ -129,28 +130,28 @@ void client::post(const std::string& host, const std::string& path, const std::m
   // generate signature_base
   std::string signature_base;
   for (auto&& param : auth_param) {
-    signature_base.append(param.first + "=" + url_.encode(param.second) + "&");
+    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" + url_.encode("https://" + host + path) + "&" + url_.encode(signature_base));
+  signature_base.assign("POST&" + util::url_encode("https://" + host + path) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(url_.encode(account_->consumer_secret()) + "&" + url_.encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = base64_.encode(hmac_sha1_.encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
   for (auto&& param : auth_param) {
-    authorization_header.append(param.first + "=\"" + url_.encode(param.second) + "\", ");
+    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
   }
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // generate post_body
   std::string post_body;
   for (auto&& param : parameters) {
-    post_body.append(param.first + "=" + url_.encode(param.second) + "&");
+    post_body.append(param.first + "=" + util::url_encode(param.second) + "&");
   };
   post_body.erase(post_body.end() - 1, post_body.end());
 
@@ -166,7 +167,7 @@ inline std::map<std::string, std::string> client::make_auth_param() {
   std::map<std::string, std::string> auth_param;
   auth_param["oauth_callback"] = "oob";
   auth_param["oauth_consumer_key"] = account_->consumer_key();
-  auth_param["oauth_nonce"] = random_str_(32);
+  auth_param["oauth_nonce"] = util::random_str(32);
   auth_param["oauth_signature_method"] = "HMAC-SHA1";
   auth_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
   auth_param["oauth_token"] = account_->oauth_token();

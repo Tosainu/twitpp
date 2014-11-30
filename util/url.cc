@@ -3,12 +3,12 @@
 
 #include <sstream>
 #include <string>
-#include "url.h"
+#include "util.h"
 
 namespace twitpp {
-namespace utility {
+namespace util {
 
-std::string url::encode(const std::string& text) {
+std::string url_encode(const std::string& text) {
   const std::string charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.~";
   std::ostringstream result;
 

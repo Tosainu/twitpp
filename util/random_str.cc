@@ -3,12 +3,12 @@
 
 #include <random>
 #include <string>
-#include "random_str.h"
+#include "util.h"
 
 namespace twitpp {
-namespace utility {
+namespace util {
 
-std::string random_str::operator()(unsigned int length) {
+std::string random_str(unsigned int length) {
   const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   std::string result;
 

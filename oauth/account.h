@@ -2,7 +2,6 @@
 #define TWITPP_OAUTH_ACCOUNT_H
 
 #include <string>
-#include "../utility/utility.h"
 
 namespace twitpp {
 namespace oauth {
@@ -34,11 +33,6 @@ private:
   std::string consumer_secret_;
   std::string oauth_token_;
   std::string oauth_token_secret_;
-
-  utility::random_str random_str_;
-  utility::base64 base64_;
-  utility::url url_;
-  utility::hmac_sha1 hmac_sha1_;
 
   inline std::map<std::string, std::string> make_auth_param();
 };
