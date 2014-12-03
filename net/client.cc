@@ -1,5 +1,7 @@
 #include <stdexcept>
+#include <tuple>
 #include <boost/xpressive/xpressive.hpp>
+#include "../util/util.h"
 #include "client.h"
 
 namespace twitpp {
@@ -8,43 +10,32 @@ namespace net {
 client::client(const net::method& method, const std::string& url)
   : io_service_(std::make_shared<boost::asio::io_service>()), context_(boost::asio::ssl::context_base::tlsv12),
     resolver_(*io_service_), request_stream_(&request_), response_(std::make_shared<net::response>()) {
-  using namespace boost::xpressive;
+  auto parsed_url = util::url_parser(url);
 
-  sregex url_parser = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *_);
-  smatch res;
+  if (std::get<0>(parsed_url) == "https") {
+    is_https_ = true;
+    context_.set_verify_mode(boost::asio::ssl::verify_none);
 
-  if (regex_match(url, res, url_parser)) {
-    query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(res[2], res[1]);
-
-    if (res[1] == "https") {
-      is_https_ = true;
-      context_.set_verify_mode(boost::asio::ssl::verify_none);
-    }
-
-    socket_ = std::make_shared<boost::asio::ip::tcp::socket>(*io_service_);
+    socket_ = nullptr;
     socket_ssl_ = std::make_shared<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>(*io_service_, context_);
-
-    std::string path;
-    if (res[3].length() == 0) {
-      path = "/";
-    } else {
-      path = res[3];
-    }
-
-    switch (method) {
-      case net::method::GET:
-        request_stream_ << "GET " << path << " HTTP/1.1\r\n";
-        break;
-      case net::method::POST:
-        request_stream_ << "POST " << path << " HTTP/1.1\r\n";
-        break;
-    }
-
-    request_stream_ << "Host: " << res[2] << "\r\n";
-    request_stream_ << "Accept: */*\r\n";
   } else {
-    throw std::invalid_argument("failed to parse the url");
+    socket_ = std::make_shared<boost::asio::ip::tcp::socket>(*io_service_);
+    socket_ssl_ = nullptr;
   }
+
+  query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(std::get<1>(parsed_url), std::get<0>(parsed_url));
+
+  switch (method) {
+    case net::method::GET:
+      request_stream_ << "GET " << std::get<2>(parsed_url) << " HTTP/1.1\r\n";
+      break;
+    case net::method::POST:
+      request_stream_ << "POST " << std::get<2>(parsed_url) << " HTTP/1.1\r\n";
+      break;
+  }
+
+  request_stream_ << "Host: " << std::get<1>(parsed_url) << "\r\n";
+  request_stream_ << "Accept: */*\r\n";
 }
 
 client::~client(){}

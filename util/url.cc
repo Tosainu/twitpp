@@ -3,6 +3,8 @@
 
 #include <sstream>
 #include <string>
+#include <tuple>
+#include <boost/xpressive/xpressive.hpp>
 #include "util.h"
 
 namespace twitpp {
@@ -30,6 +32,20 @@ std::string url_encode(const std::string& text) {
   }
 
   return result.str();
+}
+
+std::tuple<std::string, std::string, std::string> url_parser(const std::string& url) {
+  using namespace boost::xpressive;
+
+  sregex url_parser = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *_);
+  smatch res;
+  std::string path;
+
+  if (regex_search(url, res, url_parser)) {
+    return std::forward_as_tuple(res[1], res[2], res[3].length() == 0 ? static_cast<std::string>("/") : res[3]);
+  } else {
+    throw std::invalid_argument("failed to parse the url");
+  }
 }
 
 }
