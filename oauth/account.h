@@ -9,7 +9,6 @@ namespace oauth {
 class account {
 public:
   account(const std::string& consumer_key, const std::string& consumer_secret);
-  account(const std::string& api_url, const std::string& consumer_key, const std::string& consumer_secret);
   account(const std::string& consumer_key, const std::string& consumer_secret,
           const std::string& oauth_token, const std::string& oauth_token_secret);
 
@@ -26,7 +25,6 @@ public:
   std::string oauth_token_secret() const;
 
 private:
-  std::string api_url_;
   std::string authorize_url_;
 
   std::string consumer_key_;
