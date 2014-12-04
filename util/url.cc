@@ -11,23 +11,15 @@ namespace twitpp {
 namespace util {
 
 std::string url_encode(const std::string& text) {
-  const std::string charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.~";
   std::ostringstream result;
+  result.fill('0');
+  result << std::hex << std::uppercase;
 
-  for (std::string::const_iterator it = text.begin(); it != text.end(); ++it) {
-    if ((charset.find(*it)) == std::string::npos) {
-      std::ostringstream os;
-      os.setf(std::ios::hex, std::ios::basefield);
-      os.setf(std::ios::uppercase);
-      os << static_cast<int>(*it);
-
-      std::string tmp = os.str();
-
-      if (tmp.length() > 2) tmp.erase(0, 6);
-
-      result << "%" << tmp;
+  for (auto&& c : text) {
+    if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+      result << c;
     } else {
-      result << *it;
+      result << '%' << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
     }
   }
 
