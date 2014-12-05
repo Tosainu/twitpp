@@ -147,13 +147,14 @@ std::string account::oauth_token_secret() const {
 }
 
 inline std::map<std::string, std::string> account::make_auth_param() {
-  std::map<std::string, std::string> auth_param;
-  auth_param["oauth_callback"] = "oob";
-  auth_param["oauth_consumer_key"] = consumer_key_;
-  auth_param["oauth_nonce"] = util::random_str(32);
-  auth_param["oauth_signature_method"] = "HMAC-SHA1";
-  auth_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  auth_param["oauth_version"] = "1.0";
+  std::map<std::string, std::string> auth_param{
+    {"oauth_callback"         , "oob"},
+    {"oauth_consumer_key"     , consumer_key_},
+    {"oauth_nonce"            , util::random_str(32)},
+    {"oauth_signature_method" , "HMAC-SHA1"},
+    {"oauth_timestamp"        , boost::lexical_cast<std::string>(std::time(0))},
+    {"oauth_version"          , "1.0"}
+  };
 
   if (!oauth_token_.empty()) {
     auth_param["oauth_token"] = oauth_token_;

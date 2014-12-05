@@ -164,16 +164,15 @@ void client::post(const std::string& host, const std::string& path, const std::m
 }
 
 inline std::map<std::string, std::string> client::make_auth_param() {
-  std::map<std::string, std::string> auth_param;
-  auth_param["oauth_callback"] = "oob";
-  auth_param["oauth_consumer_key"] = account_->consumer_key();
-  auth_param["oauth_nonce"] = util::random_str(32);
-  auth_param["oauth_signature_method"] = "HMAC-SHA1";
-  auth_param["oauth_timestamp"] = boost::lexical_cast<std::string>(std::time(0));
-  auth_param["oauth_token"] = account_->oauth_token();
-  auth_param["oauth_version"] = "1.0";
-
-  return auth_param;
+  return std::map<std::string, std::string>{
+    {"oauth_callback"         , "oob"},
+    {"oauth_consumer_key"     , account_->consumer_key()},
+    {"oauth_nonce"            , util::random_str(32)},
+    {"oauth_signature_method" , "HMAC-SHA1"},
+    {"oauth_timestamp"        , boost::lexical_cast<std::string>(std::time(0))},
+    {"oauth_token"            , account_->oauth_token()},
+    {"oauth_version"          , "1.0"}
+  };
 }
 
 }
