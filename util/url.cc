@@ -26,7 +26,7 @@ std::string url_encode(const std::string& text) {
   return result.str();
 }
 
-std::tuple<std::string, std::string, std::string> url_parser(const std::string& url) {
+std::tuple<bool, std::string, std::string, std::string> url_parser(const std::string& url) {
   using namespace boost::xpressive;
 
   sregex url_parser = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *_);
@@ -34,9 +34,9 @@ std::tuple<std::string, std::string, std::string> url_parser(const std::string& 
   std::string path;
 
   if (regex_search(url, res, url_parser)) {
-    return std::forward_as_tuple(res[1], res[2], res[3].length() == 0 ? static_cast<std::string>("/") : res[3]);
+    return std::forward_as_tuple(true, res[1], res[2], res[3].length() == 0 ? static_cast<std::string>("/") : res[3]);
   } else {
-    throw std::invalid_argument("failed to parse the url");
+    return std::make_tuple(false, std::string(""), std::string(""), std::string(""));
   }
 }
 

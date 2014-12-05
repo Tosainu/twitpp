@@ -12,7 +12,11 @@ client::client(const net::method& method, const std::string& url)
     resolver_(*io_service_), request_stream_(&request_), response_(std::make_shared<net::response>()) {
   auto parsed_url = util::url_parser(url);
 
-  if (std::get<0>(parsed_url) == "https") {
+  if (!std::get<0>(parsed_url)) {
+    throw std::invalid_argument("failed to parse the url");
+  }
+
+  if (std::get<1>(parsed_url) == "https") {
     is_https_ = true;
     context_.set_verify_mode(boost::asio::ssl::verify_none);
 
@@ -23,18 +27,18 @@ client::client(const net::method& method, const std::string& url)
     socket_ssl_ = nullptr;
   }
 
-  query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(std::get<1>(parsed_url), std::get<0>(parsed_url));
+  query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(std::get<2>(parsed_url), std::get<1>(parsed_url));
 
   switch (method) {
     case net::method::GET:
-      request_stream_ << "GET " << std::get<2>(parsed_url) << " HTTP/1.1\r\n";
+      request_stream_ << "GET " << std::get<3>(parsed_url) << " HTTP/1.1\r\n";
       break;
     case net::method::POST:
-      request_stream_ << "POST " << std::get<2>(parsed_url) << " HTTP/1.1\r\n";
+      request_stream_ << "POST " << std::get<3>(parsed_url) << " HTTP/1.1\r\n";
       break;
   }
 
-  request_stream_ << "Host: " << std::get<1>(parsed_url) << "\r\n";
+  request_stream_ << "Host: " << std::get<2>(parsed_url) << "\r\n";
   request_stream_ << "Accept: */*\r\n";
 }
 
