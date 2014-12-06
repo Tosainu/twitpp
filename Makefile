@@ -15,7 +15,7 @@ SOURCES = \
 	./util/random_str.cc \
 	./util/sha1.cc \
 	./util/url.cc \
-	./test.cc
+	./example.cc
 
 OBJECTS = $(subst .cc,.o,$(SOURCES))
 
