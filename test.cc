@@ -45,15 +45,8 @@ int main() {
   twitpp::oauth::client oauth(io_service, ctx, account);
 
   // update
-  oauth.post("api.twitter.com", "/1.1/statuses/update.json", {{"status", "Test Tweet!"}}, [](int& status, std::string& text) {
-    if (status != 200) {
-      std::cerr << "Error!!" << std::endl;
-      return;
-    }
-
-    std::cout << text << std::endl;
-    text.assign("");
-  });
+  auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json", {{"status", "Test Tweet!"}});
+  std::cout << res.response_body << std::endl;
 
   // userstream
   oauth.get("userstream.twitter.com", "/1.1/user.json", [](int& status, std::string& text) {

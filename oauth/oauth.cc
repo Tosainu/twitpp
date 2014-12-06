@@ -1,10 +1,12 @@
 #include <ctime>
 #include <map>
 #include <string>
+#include <tuple>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/lexical_cast.hpp>
 #include "../net/async_client.h"
+#include "../net/client.h"
 #include "../util/util.h"
 #include "account.h"
 #include "oauth.h"
@@ -16,6 +18,115 @@ client::client(io_service& io_service, context& context, account& ac)
     : account_(new account(ac)), io_service_(io_service), context_(context) {}
 
 client::~client() {}
+
+net::response client::get(const std::string& url) {
+  return get(url, {});
+}
+
+net::response client::get(const std::string& url, const std::map<std::string, std::string>& parameters) {
+  auto auth_param = make_auth_param();
+  auto parsed_url = util::url_parser(url);
+
+  std::string query_str;
+  if (!parameters.empty()) {
+    auth_param.insert(parameters.begin(), parameters.end());
+
+    // generate query string
+    for (auto&& param : parameters) {
+      query_str.append(param.first + "=" + util::url_encode(param.second) + "&");
+    };
+    query_str.erase(query_str.end() - 1, query_str.end());
+  }
+
+  // generate signature_base
+  std::string signature_base;
+  for (auto&& param : auth_param) {
+    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
+  }
+  signature_base.erase(signature_base.end() - 1, signature_base.end());
+  signature_base.assign("GET&" +
+                        util::url_encode(std::get<1>(parsed_url) + "://" + std::get<2>(parsed_url) + std::get<3>(parsed_url)) +
+                        "&" + util::url_encode(signature_base));
+
+  // generate signing key
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
+
+  // set oauth_signature
+  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
+
+  // generate authorization_header
+  std::string authorization_header("Authorization: OAuth ");
+  for (auto&& param : auth_param) {
+    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
+  }
+  authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
+
+  // get
+  try {
+    net::client client(net::method::GET, query_str.empty() ? url : url + "?" + query_str);
+    client.add_header(authorization_header);
+    client.run();
+
+    return client.response();
+  } catch (std::exception& e) {
+    throw e;
+  }
+}
+
+net::response client::post(const std::string& url) {
+  return post(url, {});
+}
+
+net::response client::post(const std::string& url, const std::map<std::string, std::string>& parameters) {
+  auto auth_param = make_auth_param();
+  auto parsed_url = util::url_parser(url);
+
+  std::string query_str;
+  if (!parameters.empty()) {
+    auth_param.insert(parameters.begin(), parameters.end());
+
+    // generate query string
+    for (auto&& param : parameters) {
+      query_str.append(param.first + "=" + util::url_encode(param.second) + "&");
+    };
+    query_str.erase(query_str.end() - 1, query_str.end());
+  }
+
+  // generate signature_base
+  std::string signature_base;
+  for (auto&& param : auth_param) {
+    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
+  }
+  signature_base.erase(signature_base.end() - 1, signature_base.end());
+  signature_base.assign("POST&" +
+                        util::url_encode(std::get<1>(parsed_url) + "://" + std::get<2>(parsed_url) + std::get<3>(parsed_url)) +
+                        "&" + util::url_encode(signature_base));
+
+  // generate signing key
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
+
+  // set oauth_signature
+  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
+
+  // generate authorization_header
+  std::string authorization_header("Authorization: OAuth ");
+  for (auto&& param : auth_param) {
+    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
+  }
+  authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
+
+  // post
+  try {
+    net::client client(net::method::POST, url);
+    client.add_header(authorization_header);
+    client.add_content(query_str);
+    client.run();
+
+    return client.response();
+  } catch (std::exception& e) {
+    throw e;
+  }
+}
 
 void client::get(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
   auto auth_param = make_auth_param();

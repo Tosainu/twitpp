@@ -7,6 +7,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include "../net/response.h"
 #include "account.h"
 
 namespace twitpp {
@@ -20,6 +21,12 @@ public:
   client(io_service& io_service, context& context, account& ac);
 
   ~client();
+
+  net::response get(const std::string& url);
+  net::response get(const std::string& url, const std::map<std::string, std::string>& parameters);
+
+  net::response post(const std::string& url);
+  net::response post(const std::string& url, const std::map<std::string, std::string>& parameters);
 
   void get(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler);
   void get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
