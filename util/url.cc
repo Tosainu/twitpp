@@ -1,6 +1,3 @@
-#ifndef TWITPP_UTILITY_URL_CC
-#define TWITPP_UTILITY_URL_CC
-
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -42,5 +39,3 @@ std::tuple<bool, std::string, std::string, std::string> url_parser(const std::st
 
 }
 }
-
-#endif

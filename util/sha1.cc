@@ -1,6 +1,3 @@
-#ifndef TWITPP_UTILITY_SHA1_CC
-#define TWITPP_UTILITY_SHA1_CC
-
 #include <string>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
@@ -17,5 +14,3 @@ std::string hmac_sha1_encode(const std::string& key, const std::string& data) {
 
 }
 }
-
-#endif

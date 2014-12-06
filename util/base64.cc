@@ -1,6 +1,3 @@
-#ifndef TWITPP_UTILITY_BASE64_CC
-#define TWITPP_UTILITY_BASE64_CC
-
 #include <string>
 #include "util.h"
 
@@ -45,5 +42,3 @@ std::string base64_encode(const std::string& text) {
 
 }
 }
-
-#endif

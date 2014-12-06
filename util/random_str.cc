@@ -1,6 +1,3 @@
-#ifndef TWITPP_UTILITY_RANDOMSTR_CC
-#define TWITPP_UTILITY_RANDOMSTR_CC
-
 #include <random>
 #include <string>
 #include "util.h"
@@ -25,5 +22,3 @@ std::string random_str(unsigned int length) {
 
 }
 }
-
-#endif
