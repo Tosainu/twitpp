@@ -23,17 +23,17 @@ std::string url_encode(const std::string& text) {
   return result.str();
 }
 
-std::tuple<bool, std::string, std::string, std::string> url_parser(const std::string& url) {
+std::tuple<bool, std::string, std::string, std::string, std::string> url_parser(const std::string& url) {
   using namespace boost::xpressive;
 
-  sregex url_parser = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *_);
+  sregex url_parser = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *~(set = '?')) >> (s4 = *_);
   smatch res;
   std::string path;
 
   if (regex_search(url, res, url_parser)) {
-    return std::forward_as_tuple(true, res[1], res[2], res[3].length() == 0 ? static_cast<std::string>("/") : res[3]);
+    return std::forward_as_tuple(true, res[1], res[2], res[3].length() == 0 ? static_cast<std::string>("/") : res[3], res[4]);
   } else {
-    return std::make_tuple(false, std::string(""), std::string(""), std::string(""));
+    return std::make_tuple(false, std::string(""), std::string(""), std::string(""), std::string(""));
   }
 }
 

@@ -31,10 +31,10 @@ client::client(const net::method& method, const std::string& url)
 
   switch (method) {
     case net::method::GET:
-      request_stream_ << "GET " << std::get<3>(parsed_url) << " HTTP/1.1\r\n";
+      request_stream_ << "GET " << std::get<3>(parsed_url) << std::get<4>(parsed_url) << " HTTP/1.1\r\n";
       break;
     case net::method::POST:
-      request_stream_ << "POST " << std::get<3>(parsed_url) << " HTTP/1.1\r\n";
+      request_stream_ << "POST " << std::get<3>(parsed_url) << std::get<4>(parsed_url) << " HTTP/1.1\r\n";
       break;
   }
 
