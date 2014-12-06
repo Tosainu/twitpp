@@ -14,7 +14,7 @@
 namespace twitpp {
 namespace oauth {
 
-client::client(io_service& io_service, context& context, account& ac)
+client::client(boost::asio::io_service& io_service, boost::asio::ssl::context& context, account& ac)
     : account_(new account(ac)), io_service_(io_service), context_(context) {}
 
 client::~client() {}

@@ -15,10 +15,7 @@ namespace oauth {
 
 class client {
 public:
-  typedef boost::asio::io_service io_service;
-  typedef boost::asio::ssl::context context;
-
-  client(io_service& io_service, context& context, account& ac);
+  client(boost::asio::io_service& io_service, boost::asio::ssl::context& context, account& ac);
 
   ~client();
 
@@ -38,8 +35,8 @@ public:
 private:
   std::unique_ptr<account> account_;
 
-  io_service& io_service_;
-  context& context_;
+  boost::asio::io_service& io_service_;
+  boost::asio::ssl::context& context_;
 
   inline std::map<std::string, std::string> make_auth_param();
 };
