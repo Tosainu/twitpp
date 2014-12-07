@@ -1,16 +1,8 @@
 #include <iostream>
-#include <map>
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
 #include "oauth/account.h"
 #include "oauth/oauth.h"
 
 int main() {
-  namespace asio = boost::asio;
-  asio::io_service io_service;
-  asio::ssl::context ctx(asio::ssl::context::tlsv12);
-  ctx.set_verify_mode(asio::ssl::verify_none);
-
   // set consumer key
   twitpp::oauth::account account("CONSUMER", "CONSUMER_SECRET");
 
@@ -42,7 +34,7 @@ int main() {
     std::cerr << e.what() << std::endl;
   }
 
-  twitpp::oauth::client oauth(io_service, ctx, account);
+  twitpp::oauth::client oauth(account);
 
   // update
   auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json", {{"status", "Test Tweet!"}});
@@ -56,6 +48,6 @@ int main() {
     }
 
     std::cout << text << std::endl;
-    text.assign("");
+    text.clear();
   });
 }

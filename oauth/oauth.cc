@@ -1,21 +1,19 @@
 #include <ctime>
-#include <map>
-#include <string>
 #include <tuple>
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
 #include <boost/lexical_cast.hpp>
 #include "../net/async_client.h"
 #include "../net/client.h"
 #include "../util/util.h"
-#include "account.h"
 #include "oauth.h"
 
 namespace twitpp {
 namespace oauth {
 
-client::client(boost::asio::io_service& io_service, boost::asio::ssl::context& context, account& ac)
-    : account_(new account(ac)), io_service_(io_service), context_(context) {}
+client::client(account& ac)
+    : account_(new account(ac)), io_service_(std::make_shared<boost::asio::io_service>()),
+      context_(std::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12)) {
+  context_->set_verify_mode(boost::asio::ssl::verify_none);
+}
 
 client::~client() {}
 
@@ -153,11 +151,11 @@ void client::get(const std::string& host, const std::string& path, std::function
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // get
-  net::async_client client(io_service_, context_, host, path);
+  net::async_client client(*io_service_, *context_, host, path);
   client.get(authorization_header, handler);
-  io_service_.run();
+  io_service_->run();
 
-  io_service_.reset();
+  io_service_->reset();
 }
 
 void client::get(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
@@ -194,11 +192,11 @@ void client::get(const std::string& host, const std::string& path, const std::ma
   post_body.erase(post_body.end() - 1, post_body.end());
 
   // get
-  net::async_client client(io_service_, context_, host, path + "?" + post_body);
+  net::async_client client(*io_service_, *context_, host, path + "?" + post_body);
   client.get(authorization_header, handler);
-  io_service_.run();
+  io_service_->run();
 
-  io_service_.reset();
+  io_service_->reset();
 }
 
 void client::post(const std::string& host, const std::string& path, std::function<void(int&, std::string&)> handler) {
@@ -226,11 +224,11 @@ void client::post(const std::string& host, const std::string& path, std::functio
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  net::async_client client(io_service_, context_, host, path);
+  net::async_client client(*io_service_, *context_, host, path);
   client.post(authorization_header, "", handler);
-  io_service_.run();
+  io_service_->run();
 
-  io_service_.reset();
+  io_service_->reset();
 }
 
 void client::post(const std::string& host, const std::string& path, const std::map<std::string, std::string> parameters,
@@ -267,11 +265,11 @@ void client::post(const std::string& host, const std::string& path, const std::m
   post_body.erase(post_body.end() - 1, post_body.end());
 
   // post
-  net::async_client client(io_service_, context_, host, path);
+  net::async_client client(*io_service_, *context_, host, path);
   client.post(authorization_header, post_body, handler);
-  io_service_.run();
+  io_service_->run();
 
-  io_service_.reset();
+  io_service_->reset();
 }
 
 inline std::map<std::string, std::string> client::make_auth_param() {
