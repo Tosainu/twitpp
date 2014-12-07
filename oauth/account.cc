@@ -1,6 +1,4 @@
 #include <ctime>
-#include <map>
-#include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "../net/client.h"

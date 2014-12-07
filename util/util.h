@@ -1,6 +1,9 @@
 #ifndef TWITPP_UTILITY_H
 #define TWITPP_UTILITY_H
 
+#include <string>
+#include <tuple>
+
 namespace twitpp {
 namespace util {
 

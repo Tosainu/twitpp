@@ -1,6 +1,7 @@
 #ifndef TWITPP_OAUTH_ACCOUNT_H
 #define TWITPP_OAUTH_ACCOUNT_H
 
+#include <map>
 #include <string>
 
 namespace twitpp {

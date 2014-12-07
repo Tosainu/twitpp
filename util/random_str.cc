@@ -1,5 +1,4 @@
 #include <random>
-#include <string>
 #include "util.h"
 
 namespace twitpp {
@@ -9,8 +8,7 @@ std::string random_str(unsigned int length) {
   const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   std::string result;
 
-  std::random_device rd;
-  std::mt19937 mt(rd());
+  std::mt19937 mt{std::random_device()()};
   std::uniform_int_distribution<unsigned int> random(0, 61);
 
   for (unsigned int cnt = 0; cnt < length; ++cnt) {
