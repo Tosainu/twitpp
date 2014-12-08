@@ -35,16 +35,16 @@ private:
 
   std::function<void(int&, std::string&)> handler_;
 
-  void handleResolve(const boost::system::error_code& err, asio::ip::tcp::resolver::iterator endpoint_iterator);
-  void handleConnect(const boost::system::error_code& err);
-  void handleHandshake(const boost::system::error_code& err);
-  void handleWrite(const boost::system::error_code& err);
-  void handleReadStatus(const boost::system::error_code& err);
-  void handleReadHeader(const boost::system::error_code& err);
-  void handleReadChunkSize(const boost::system::error_code& err);
-  void handleReadChunkBody(std::size_t content_length, const boost::system::error_code& err);
-  void handleReadContent(std::size_t content_length, const boost::system::error_code& err);
-  void handleReadContentAll(const boost::system::error_code& err);
+  void handle_resolve(const boost::system::error_code& err, asio::ip::tcp::resolver::iterator endpoint_iterator);
+  void handle_connect(const boost::system::error_code& err);
+  void handle_handshake(const boost::system::error_code& err);
+  void handle_write(const boost::system::error_code& err);
+  void handle_read_status(const boost::system::error_code& err);
+  void handle_read_header(const boost::system::error_code& err);
+  void handle_read_chunk_size(const boost::system::error_code& err);
+  void handle_read_chunk_body(std::size_t content_length, const boost::system::error_code& err);
+  void handle_read_content(std::size_t content_length, const boost::system::error_code& err);
+  void handle_read_content_all(const boost::system::error_code& err);
 
   int chunk_parser(const std::string& source, std::size_t& chunk) {
     namespace qi = boost::spirit::qi;

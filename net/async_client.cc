@@ -28,7 +28,7 @@ void async_client::get(const std::string& header, std::function<void(int&, std::
   // get server name and host info
   asio::ip::tcp::resolver::query query(host_, "443");
   resolver_.async_resolve(query,
-                          boost::bind(&async_client::handleResolve, this, asio::placeholders::error, asio::placeholders::iterator));
+                          boost::bind(&async_client::handle_resolve, this, asio::placeholders::error, asio::placeholders::iterator));
 }
 
 // POST method
@@ -55,45 +55,45 @@ void async_client::post(const std::string& header, const std::string& data, std:
   // get server name and host info
   asio::ip::tcp::resolver::query query(host_, "443");
   resolver_.async_resolve(query,
-                          boost::bind(&async_client::handleResolve, this, asio::placeholders::error, asio::placeholders::iterator));
+                          boost::bind(&async_client::handle_resolve, this, asio::placeholders::error, asio::placeholders::iterator));
 }
 
-void async_client::handleResolve(const boost::system::error_code& error, asio::ip::tcp::resolver::iterator endpoint_iterator) {
+void async_client::handle_resolve(const boost::system::error_code& error, asio::ip::tcp::resolver::iterator endpoint_iterator) {
   if (!error) {
     asio::async_connect(socket_.lowest_layer(), endpoint_iterator,
-                        boost::bind(&async_client::handleConnect, this, asio::placeholders::error));
+                        boost::bind(&async_client::handle_connect, this, asio::placeholders::error));
   } else {
     std::cout << "Resolve failed: " << error.value() << "\n";
   }
 }
 
-void async_client::handleConnect(const boost::system::error_code& error) {
+void async_client::handle_connect(const boost::system::error_code& error) {
   if (!error) {
     socket_.async_handshake(asio::ssl::stream_base::client,
-                            boost::bind(&async_client::handleHandshake, this, asio::placeholders::error));
+                            boost::bind(&async_client::handle_handshake, this, asio::placeholders::error));
   } else {
     std::cout << "Connect failed: " << error.value() << "\n";
   }
 }
 
-void async_client::handleHandshake(const boost::system::error_code& error) {
+void async_client::handle_handshake(const boost::system::error_code& error) {
   if (!error) {
-    asio::async_write(socket_, request_buffer_, boost::bind(&async_client::handleWrite, this, asio::placeholders::error));
+    asio::async_write(socket_, request_buffer_, boost::bind(&async_client::handle_write, this, asio::placeholders::error));
   } else {
     std::cout << "Handshake failed: " << error.value() << "\n";
   }
 }
 
-void async_client::handleWrite(const boost::system::error_code& error) {
+void async_client::handle_write(const boost::system::error_code& error) {
   if (!error) {
     asio::async_read_until(socket_, response_buffer_, "\r\n",
-                           boost::bind(&async_client::handleReadStatus, this, asio::placeholders::error));
+                           boost::bind(&async_client::handle_read_status, this, asio::placeholders::error));
   } else {
     std::cout << "Write failed: " << error.value() << "\n";
   }
 }
 
-void async_client::handleReadStatus(const boost::system::error_code& error) {
+void async_client::handle_read_status(const boost::system::error_code& error) {
   if (!error) {
     // check response
     std::istream responseStream(&response_buffer_);
@@ -108,13 +108,13 @@ void async_client::handleReadStatus(const boost::system::error_code& error) {
 
     // read response header
     asio::async_read_until(socket_, response_buffer_, "\r\n\r\n",
-                           boost::bind(&async_client::handleReadHeader, this, asio::placeholders::error));
+                           boost::bind(&async_client::handle_read_header, this, asio::placeholders::error));
   } else {
     std::cout << "Read status failed: " << error.value() << "\n";
   }
 }
 
-void async_client::handleReadHeader(const boost::system::error_code& error) {
+void async_client::handle_read_header(const boost::system::error_code& error) {
   if (!error) {
     // read response header
     std::istream responseStream(&response_buffer_);
@@ -130,24 +130,24 @@ void async_client::handleReadHeader(const boost::system::error_code& error) {
         response_.response_header["transfer-encoding"] == "chunked") {
       // chuncked transfer
       asio::async_read_until(socket_, response_buffer_, "\r\n",
-                             boost::bind(&async_client::handleReadChunkSize, this, asio::placeholders::error));
+                             boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
     } else if (response_.response_header.count("Content-Length") != 0) {
       // use content length
       std::size_t content_length = std::stoi(response_.response_header["Content-Length"]);
 
       asio::async_read(socket_, response_buffer_,
                        asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
-                       boost::bind(&async_client::handleReadContent, this, content_length, asio::placeholders::error));
+                       boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
     } else if (response_.response_header.count("content-length") != 0) {
       std::size_t content_length = std::stoi(response_.response_header["content-length"]);
 
       asio::async_read(socket_, response_buffer_,
                        asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
-                       boost::bind(&async_client::handleReadContent, this, content_length, asio::placeholders::error));
+                       boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
     } else {
       // other (not working now
       asio::async_read(socket_, response_buffer_, asio::transfer_all(),
-                       boost::bind(&async_client::handleReadContentAll, this, asio::placeholders::error));
+                       boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
     }
 
   } else {
@@ -155,13 +155,13 @@ void async_client::handleReadHeader(const boost::system::error_code& error) {
   }
 }
 
-void async_client::handleReadChunkSize(const boost::system::error_code& error) {
+void async_client::handle_read_chunk_size(const boost::system::error_code& error) {
   if (!error) {
     if (response_buffer_.size() == 0) {
       return;
     } else if (response_buffer_.size() <= 2) {
       asio::async_read_until(socket_, response_buffer_, "\r\n",
-                             boost::bind(&async_client::handleReadChunkSize, this, asio::placeholders::error));
+                             boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
     } else {
       // read chunk size
       std::size_t chunk_size;
@@ -177,12 +177,12 @@ void async_client::handleReadChunkSize(const boost::system::error_code& error) {
                    asio::transfer_at_least((chunk_size + 2) - asio::buffer_size(response_buffer_.data())), ec);
         response_buffer_.consume(chunk_size + 2);
         asio::async_read_until(socket_, response_buffer_, "\r\n",
-                               boost::bind(&async_client::handleReadChunkSize, this, asio::placeholders::error));
+                               boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
       } else {
         // read chunk
         asio::async_read(socket_, response_buffer_,
                          asio::transfer_at_least(chunk_size - asio::buffer_size(response_buffer_.data())),
-                         boost::bind(&async_client::handleReadChunkBody, this, chunk_size, asio::placeholders::error));
+                         boost::bind(&async_client::handle_read_chunk_body, this, chunk_size, asio::placeholders::error));
       }
     }
   } else if (error != asio::error::eof) {
@@ -190,7 +190,7 @@ void async_client::handleReadChunkSize(const boost::system::error_code& error) {
   }
 }
 
-void async_client::handleReadChunkBody(std::size_t content_length, const boost::system::error_code& error) {
+void async_client::handle_read_chunk_body(std::size_t content_length, const boost::system::error_code& error) {
   if (!error) {
     boost::system::error_code ec;
     asio::read(socket_, response_buffer_,
@@ -201,13 +201,13 @@ void async_client::handleReadChunkBody(std::size_t content_length, const boost::
     handler_(response_.status_code, response_.response_body);
 
     asio::async_read_until(socket_, response_buffer_, "\r\n",
-                           boost::bind(&async_client::handleReadChunkSize, this, asio::placeholders::error));
+                           boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
     std::cout << "Read chunk failed: " << error.value() << "\n";
   }
 }
 
-void async_client::handleReadContent(std::size_t content_length, const boost::system::error_code& error) {
+void async_client::handle_read_content(std::size_t content_length, const boost::system::error_code& error) {
   if (!error) {
     response_.response_body.append(asio::buffers_begin(response_buffer_.data()), asio::buffers_end(response_buffer_.data()));
     response_buffer_.consume(response_buffer_.size());
@@ -217,7 +217,7 @@ void async_client::handleReadContent(std::size_t content_length, const boost::sy
   }
 }
 
-void async_client::handleReadContentAll(const boost::system::error_code& error) {
+void async_client::handle_read_content_all(const boost::system::error_code& error) {
   if (!error) {
     std::ostringstream tmp;
     tmp << &response_buffer_;
@@ -226,7 +226,7 @@ void async_client::handleReadContentAll(const boost::system::error_code& error) 
 
     // Continue reading remaining data until EOF.
     asio::async_read(socket_, response_buffer_, asio::transfer_at_least(1),
-                     boost::bind(&async_client::handleReadContentAll, this, asio::placeholders::error));
+                     boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
     std::cout << "Read content all failed: " << error.value() << "\n";
   }
