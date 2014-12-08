@@ -23,7 +23,6 @@ net::response client::get(const std::string& url) {
 
 net::response client::get(const std::string& url, const std::map<std::string, std::string>& parameters) {
   auto auth_param = make_auth_param();
-  auto parsed_url = util::url_parser(url);
 
   std::string query_str;
   if (!parameters.empty()) {
@@ -42,9 +41,7 @@ net::response client::get(const std::string& url, const std::map<std::string, st
     signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("GET&" +
-                        util::url_encode(std::get<1>(parsed_url) + "://" + std::get<2>(parsed_url) + std::get<3>(parsed_url)) +
-                        "&" + util::url_encode(signature_base));
+  signature_base.assign("GET&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
   std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
@@ -77,7 +74,6 @@ net::response client::post(const std::string& url) {
 
 net::response client::post(const std::string& url, const std::map<std::string, std::string>& parameters) {
   auto auth_param = make_auth_param();
-  auto parsed_url = util::url_parser(url);
 
   std::string query_str;
   if (!parameters.empty()) {
@@ -96,9 +92,7 @@ net::response client::post(const std::string& url, const std::map<std::string, s
     signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" +
-                        util::url_encode(std::get<1>(parsed_url) + "://" + std::get<2>(parsed_url) + std::get<3>(parsed_url)) +
-                        "&" + util::url_encode(signature_base));
+  signature_base.assign("POST&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
   std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
