@@ -30,24 +30,25 @@ int main() {
       std::cerr << "ERROR" << std::endl;
       return -1;
     }
+
+    twitpp::oauth::client oauth(account);
+
+    // update
+    auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json", {{"status", "Test Tweet!"}});
+    std::cout << res.response_body << std::endl;
+
+    // userstream
+    oauth.get("userstream.twitter.com", "/1.1/user.json", [](int& status, std::string& text) {
+      if (status != 200) {
+        std::cerr << "Error!!" << std::endl;
+        return;
+      }
+
+      std::cout << text << std::endl;
+      text.clear();
+    });
   } catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "An exception occurred: " << e.what() << std::endl;
+    return -1;
   }
-
-  twitpp::oauth::client oauth(account);
-
-  // update
-  auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json", {{"status", "Test Tweet!"}});
-  std::cout << res.response_body << std::endl;
-
-  // userstream
-  oauth.get("userstream.twitter.com", "/1.1/user.json", [](int& status, std::string& text) {
-    if (status != 200) {
-      std::cerr << "Error!!" << std::endl;
-      return;
-    }
-
-    std::cout << text << std::endl;
-    text.clear();
-  });
 }

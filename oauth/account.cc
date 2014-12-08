@@ -66,7 +66,7 @@ int account::get_authorize_url() {
       return -1;
     }
   } catch (std::exception& e) {
-    throw e;
+    throw;
   }
 }
 
@@ -120,7 +120,7 @@ int account::get_oauth_token(const std::string& pin) {
       return -1;
     }
   } catch (std::exception& e) {
-    throw e;
+    throw;
   }
 }
 

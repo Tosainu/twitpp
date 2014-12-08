@@ -64,7 +64,7 @@ net::response client::get(const std::string& url, const std::map<std::string, st
 
     return client.response();
   } catch (std::exception& e) {
-    throw e;
+    throw;
   }
 }
 
@@ -116,7 +116,7 @@ net::response client::post(const std::string& url, const std::map<std::string, s
 
     return client.response();
   } catch (std::exception& e) {
-    throw e;
+    throw;
   }
 }
 
