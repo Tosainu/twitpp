@@ -1,4 +1,4 @@
-# twitpp
+# twitpp [![Build Status](https://travis-ci.org/Tosainu/twitpp.svg?branch=master)](https://travis-ci.org/Tosainu/twitpp)
 twitpp is a Twitter Library for C++11.  
 
 ## NOTICE
