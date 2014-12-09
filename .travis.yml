@@ -1,0 +1,13 @@
+language: cpp
+script:
+    - g++-4.8 --version
+    - make CXX=g++-4.8
+    - make clean
+    - make CXX=clang++
+    - make clean
+install:
+    - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+    - sudo add-apt-repository --yes ppa:boost-latest/ppa
+    - sudo apt-get -qq update
+    - sudo apt-get -qq install g++-4.8
+    - sudo apt-get -qq install libboost1.55-all-dev
