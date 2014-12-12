@@ -1,8 +1,7 @@
-CXX = g++
-CXXFLAGS = -std=c++11
 CPPFLAGS = -Wall -Wextra
-LDFLAGS = -Wl,-z,now,-z,relro
-LDLIBS = -lboost_system -lcrypto -lssl -pthread
+CXXFLAGS = -std=c++11
+LDFLAGS  = -Wl,-z,now,-z,relro
+LDLIBS   = -lboost_system -lcrypto -lssl -pthread
 
 TARGET = a.out
 
