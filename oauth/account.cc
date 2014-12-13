@@ -16,8 +16,6 @@ account::account(const std::string& consumer_key, const std::string& consumer_se
   : consumer_key_(consumer_key), consumer_secret_(consumer_secret),
     oauth_token_(oauth_token), oauth_token_secret_(oauth_token_secret) {}
 
-account::~account() {}
-
 int account::get_authorize_url() {
   auto auth_param = make_auth_param();
 

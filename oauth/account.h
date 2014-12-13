@@ -13,8 +13,6 @@ public:
   account(const std::string& consumer_key, const std::string& consumer_secret,
           const std::string& oauth_token, const std::string& oauth_token_secret);
 
-  ~account();
-
   int get_authorize_url();
   int get_oauth_token(const std::string& pin);
 

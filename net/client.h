@@ -17,8 +17,6 @@ class client {
 public:
   client(const net::method& method, const std::string& url);
 
-  ~client();
-
   void add_header(const std::string& header);
   void add_content(const std::string& content);
 
@@ -45,7 +43,6 @@ private:
   std::ostream request_stream_;
 
   bool content_flag_ = false;
-  bool is_https_ = false;
 
   std::shared_ptr<net::response> response_;
 };

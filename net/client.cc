@@ -17,7 +17,6 @@ client::client(const net::method& method, const std::string& url)
   }
 
   if (std::get<1>(parsed_url) == "https") {
-    is_https_ = true;
     context_.set_verify_mode(boost::asio::ssl::verify_none);
 
     socket_ = nullptr;
@@ -42,8 +41,6 @@ client::client(const net::method& method, const std::string& url)
   request_stream_ << "Accept: */*\r\n";
 }
 
-client::~client(){}
-
 void client::add_header(const std::string& header) {
   request_stream_ << header << "\r\n";
 }
@@ -55,8 +52,6 @@ void client::add_content(const std::string& content) {
     request_stream_ << "Connection: close\r\n\r\n";
     request_stream_ << content << "\r\n";
     content_flag_ = true;
-  } else {
-    // throw 
   }
 }
 
@@ -65,7 +60,7 @@ void client::run() {
     request_stream_ << "Connection: close\r\n\r\n" << std::flush;
   }
 
-  if (is_https_) {
+  if (socket_ssl_) {
     connect_https();
   } else {
     connect_http();
