@@ -10,11 +10,9 @@
 namespace twitpp {
 namespace net {
 
-namespace asio = boost::asio;
-
 class async_client {
 public:
-  async_client(asio::io_service& io_service, asio::ssl::context& context, const std::string& host, const std::string& path);
+  async_client(boost::asio::io_service& io_service, boost::asio::ssl::context& context, const std::string& host, const std::string& path);
 
   void get(const std::string& header, std::function<void(int&, std::string&)> handler);
   void post(const std::string& header, const std::string& data, std::function<void(int&, std::string&)> handler);
@@ -22,18 +20,18 @@ public:
   response response_;
 
 private:
-  asio::ip::tcp::resolver resolver_;
-  asio::ssl::stream<asio::ip::tcp::socket> socket_;
+  boost::asio::ip::tcp::resolver resolver_;
+  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
 
   std::string host_;
   std::string path_;
 
-  asio::streambuf request_buffer_;
-  asio::streambuf response_buffer_;
+  boost::asio::streambuf request_buffer_;
+  boost::asio::streambuf response_buffer_;
 
   std::function<void(int&, std::string&)> handler_;
 
-  void handle_resolve(const boost::system::error_code& err, asio::ip::tcp::resolver::iterator endpoint_iterator);
+  void handle_resolve(const boost::system::error_code& err, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
   void handle_connect(const boost::system::error_code& err);
   void handle_handshake(const boost::system::error_code& err);
   void handle_write(const boost::system::error_code& err);
