@@ -10,10 +10,7 @@ SOURCES = \
 	./net/client.cc \
 	./oauth/account.cc \
 	./oauth/oauth.cc \
-	./util/base64.cc \
-	./util/random_str.cc \
-	./util/sha1.cc \
-	./util/url.cc \
+	./util/util.cc \
 	./example.cc
 
 OBJECTS = $(subst .cc,.o,$(SOURCES))
