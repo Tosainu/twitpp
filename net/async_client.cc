@@ -1,5 +1,7 @@
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include "async_client.h"
 
@@ -164,25 +166,18 @@ void async_client::handle_read_chunk_size(const boost::system::error_code& error
                              boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
     } else {
       // read chunk size
-      std::size_t chunk_size;
-      response_buffer_.consume(chunk_parser((std::string)asio::buffer_cast<const char*>(response_buffer_.data()), chunk_size));
+      std::size_t chunk_size = std::stoi(static_cast<std::string>(asio::buffer_cast<const char*>(response_buffer_.data())),
+                                         nullptr, 16);
+      response_buffer_.consume(chunk_size);
 
-      if (chunk_size == 0) {
-        // end
-        return;
-      } else if (chunk_size <= 2) {
-        // space only ?
-        boost::system::error_code ec;
-        asio::read(socket_, response_buffer_,
-                   asio::transfer_at_least((chunk_size + 2) - asio::buffer_size(response_buffer_.data())), ec);
-        response_buffer_.consume(chunk_size + 2);
-        asio::async_read_until(socket_, response_buffer_, "\r\n",
-                               boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
-      } else {
+      if (chunk_size > 0) {
         // read chunk
         asio::async_read(socket_, response_buffer_,
                          asio::transfer_at_least(chunk_size - asio::buffer_size(response_buffer_.data())),
                          boost::bind(&async_client::handle_read_chunk_body, this, chunk_size, asio::placeholders::error));
+      } else {
+        // end
+        return;
       }
     }
   } else if (error != asio::error::eof) {

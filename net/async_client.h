@@ -5,8 +5,6 @@
 #include <functional>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/bind.hpp>
-#include <boost/spirit/include/qi.hpp>
 #include "response.h"
 
 namespace twitpp {
@@ -45,16 +43,6 @@ private:
   void handle_read_chunk_body(std::size_t content_length, const boost::system::error_code& err);
   void handle_read_content(std::size_t content_length, const boost::system::error_code& err);
   void handle_read_content_all(const boost::system::error_code& err);
-
-  int chunk_parser(const std::string& source, std::size_t& chunk) {
-    namespace qi = boost::spirit::qi;
-    const qi::rule<std::string::const_iterator, unsigned int()> rule = qi::hex >> qi::lit("\r\n");
-
-    std::string::const_iterator it = source.cbegin();
-    qi::parse(it, source.cend(), rule, chunk);
-
-    return std::distance(source.cbegin(), it);
-  }
 };
 
 }
