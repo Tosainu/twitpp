@@ -25,8 +25,8 @@ public:
   net::response& response();
 
 private:
-  void connect_http();
-  void connect_https();
+  template <typename socket_ptr>
+  void read_response(socket_ptr socket);
 
   std::shared_ptr<boost::asio::io_service> io_service_;
 

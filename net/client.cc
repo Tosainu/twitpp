@@ -60,42 +60,43 @@ void client::run() {
     request_stream_ << "Connection: close\r\n\r\n" << std::flush;
   }
 
+  // name resolving
+  boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver_.resolve(*query_);
+
+  // creaate connection
   if (socket_ssl_) {
-    connect_https();
+    socket_ssl_->lowest_layer().connect(*endpoint_iterator);
+    socket_ssl_->handshake(boost::asio::ssl::stream_base::client);
+
+    read_response(socket_ssl_);
   } else {
-    connect_http();
+    boost::asio::connect(*socket_, endpoint_iterator);
+
+    read_response(socket_);
   }
 }
 
-void client::connect_http() {
-  // get a list of endpoints
-  boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver_.resolve(*query_);
-
-  // creaate connection
-  boost::asio::connect(*socket_, endpoint_iterator);
-
+template <typename socket_ptr>
+void client::read_response(socket_ptr socket) {
   // send requests
-  boost::asio::write(*socket_, request_);
+  boost::asio::write(*socket, request_);
 
-  // read response
+  // read status
   boost::asio::streambuf response;
-  boost::asio::read_until(*socket_, response, "\r\n");
+  boost::asio::read_until(*socket, response, "\r\n");
 
-  // check responce
   std::istream response_stream(&response);
-
-  response_stream >> response_->http_version;
-  response_stream >> response_->status_code;
+  response_stream >> response_->http_version >> response_->status_code;
   std::getline(response_stream, response_->status_message);
 
   if(!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
     throw std::runtime_error("invalid response");
   }
 
-  // read response header
-  boost::asio::read_until(*socket_, response, "\r\n\r\n");
-  std::string header;
+  // read header
+  boost::asio::read_until(*socket, response, "\r\n\r\n");
 
+  std::string header;
   while (std::getline(response_stream, header) && header != "\r") {
     std::string field_name(header, 0, header.find(":", 0));
     std::string field_body(header, header.find(":", 0) + 2);
@@ -105,55 +106,7 @@ void client::connect_http() {
 
   // read until EOF
   boost::system::error_code error;
-  while(boost::asio::read(*socket_, response, boost::asio::transfer_all(), error));
-  response_->response_body.assign(boost::asio::buffers_begin(response.data()), boost::asio::buffers_end(response.data()));
-  response.consume(response.size());
-
-  if(error != boost::asio::error::eof) {
-    throw boost::system::system_error(error);
-  }
-}
-
-void client::connect_https() {
-  // get a list of endpoints
-  boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver_.resolve(*query_);
-
-  // creaate connection
-  socket_ssl_->lowest_layer().connect(*endpoint_iterator);
-  socket_ssl_->handshake(boost::asio::ssl::stream_base::client);
-
-  // send requests
-  boost::asio::write(*socket_ssl_, request_);
-
-  // read response
-  boost::asio::streambuf response;
-  boost::asio::read_until(*socket_ssl_, response, "\r\n");
-
-  // check responce
-  std::istream response_stream(&response);
-
-  response_stream >> response_->http_version;
-  response_stream >> response_->status_code;
-  std::getline(response_stream, response_->status_message);
-
-  if(!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
-    throw std::runtime_error("invalid response");
-  }
-
-  // read response header
-  boost::asio::read_until(*socket_ssl_, response, "\r\n\r\n");
-  std::string header;
-
-  while (std::getline(response_stream, header) && header != "\r") {
-    std::string field_name(header, 0, header.find(":", 0));
-    std::string field_body(header, header.find(":", 0) + 2);
-
-    response_->response_header[field_name] = field_body;
-  }
-
-  // read until EOF
-  boost::system::error_code error;
-  while(boost::asio::read(*socket_ssl_, response, boost::asio::transfer_all(), error));
+  while(boost::asio::read(*socket, response, boost::asio::transfer_all(), error));
   response_->response_body.assign(boost::asio::buffers_begin(response.data()), boost::asio::buffers_end(response.data()));
   response.consume(response.size());
 
