@@ -160,6 +160,7 @@ void async_client::handle_read_chunk_size(const boost::system::error_code& error
     if (response_buffer_.size() == 0) {
       return;
     } else if (response_buffer_.size() <= 2) {
+      response_buffer_.consume(response_buffer_.size());
       asio::async_read_until(socket_, response_buffer_, "\r\n",
                              boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
     } else {
