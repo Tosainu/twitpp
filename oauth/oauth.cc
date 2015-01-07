@@ -9,7 +9,13 @@
 namespace twitpp {
 namespace oauth {
 
-client::client(account& ac)
+client::client(const account& ac)
+    : account_(new account(ac)), io_service_(std::make_shared<boost::asio::io_service>()),
+      context_(std::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12)) {
+  context_->set_verify_mode(boost::asio::ssl::verify_none);
+}
+
+client::client(const account&& ac)
     : account_(new account(ac)), io_service_(std::make_shared<boost::asio::io_service>()),
       context_(std::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12)) {
   context_->set_verify_mode(boost::asio::ssl::verify_none);

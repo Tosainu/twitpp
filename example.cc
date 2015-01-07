@@ -32,6 +32,7 @@ int main() {
     }
 
     twitpp::oauth::client oauth(account);
+    // twitpp::oauth::client oauth(twitpp::oauth::account("CK", "CS", "AT", "AS"));
 
     // update
     auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json", {{"status", "Test Tweet!"}});

@@ -15,7 +15,8 @@ namespace oauth {
 
 class client {
 public:
-  client(account& ac);
+  client(const account& ac);
+  client(const account&& ac);
 
   net::response get(const std::string& url);
   net::response get(const std::string& url, const std::map<std::string, std::string>& parameters);
