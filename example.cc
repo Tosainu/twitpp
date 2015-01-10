@@ -39,7 +39,7 @@ int main() {
     std::cout << res.body << std::endl;
 
     // userstream
-    oauth.get("userstream.twitter.com", "/1.1/user.json", [](twitpp::net::response& response) {
+    oauth.stream_get("https://userstream.twitter.com/1.1/user.json", [](twitpp::net::response& response) {
       if (response.status_code != 200) {
         std::cerr << "Error!!" << std::endl;
         return;

@@ -5,6 +5,7 @@
 #include <functional>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include "method.h"
 #include "response.h"
 
 namespace twitpp {
@@ -12,23 +13,34 @@ namespace net {
 
 class async_client {
 public:
-  async_client(boost::asio::io_service& io_service, boost::asio::ssl::context& context, const std::string& host, const std::string& path);
+  async_client(const net::method& method, const std::string& url);
 
-  void get(const std::string& header, const response_handler& handler);
-  void post(const std::string& header, const std::string& data, const response_handler& handler);
+  void add_header(const std::string& header);
+  void add_content(const std::string& content);
+
+  void run(const response_handler& handler);
+
+  // void get(const std::string& header, const response_handler& handler);
+  // void post(const std::string& header, const std::string& data, const response_handler& handler);
 
 private:
+  std::shared_ptr<boost::asio::io_service> io_service_;
+
+  boost::asio::ssl::context context_;
+
   boost::asio::ip::tcp::resolver resolver_;
-  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
+  std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> socket_;
 
-  std::string host_;
-  std::string path_;
+  std::shared_ptr<boost::asio::ip::tcp::resolver::query> query_;
 
-  boost::asio::streambuf request_buffer_;
+  boost::asio::streambuf request_;
+  std::ostream request_stream_;
   boost::asio::streambuf response_buffer_;
 
   response response_;
   response_handler handler_;
+
+  bool content_flag_ = false;
 
   void handle_resolve(const boost::system::error_code& err, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
   void handle_connect(const boost::system::error_code& err);

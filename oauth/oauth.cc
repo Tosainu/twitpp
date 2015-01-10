@@ -9,17 +9,9 @@
 namespace twitpp {
 namespace oauth {
 
-client::client(const account& ac)
-    : account_(new account(ac)), io_service_(std::make_shared<boost::asio::io_service>()),
-      context_(std::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12)) {
-  context_->set_verify_mode(boost::asio::ssl::verify_none);
-}
+client::client(const account& ac) : account_(new account(ac)) {}
 
-client::client(const account&& ac)
-    : account_(new account(ac)), io_service_(std::make_shared<boost::asio::io_service>()),
-      context_(std::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12)) {
-  context_->set_verify_mode(boost::asio::ssl::verify_none);
-}
+client::client(const account&& ac) : account_(new account(ac)) {}
 
 net::response client::get(const std::string& url) {
   return get(url, {});
@@ -124,12 +116,12 @@ net::response client::post(const std::string& url, const std::map<std::string, s
   }
 }
 
-void client::get(const std::string& host, const std::string& path, const net::response_handler& handler) {
-  get(host, path, {}, handler);
+void client::stream_get(const std::string& url, const net::response_handler& handler) {
+  stream_get(url, {}, handler);
 }
 
-void client::get(const std::string& host, const std::string& path, const std::map<std::string, std::string>& parameters,
-                 const net::response_handler& handler) {
+void client::stream_get(const std::string& url, const std::map<std::string, std::string>& parameters,
+                       const net::response_handler& handler) {
   auto auth_param = make_auth_param();
 
   std::string query_str;
@@ -149,10 +141,11 @@ void client::get(const std::string& host, const std::string& path, const std::ma
     signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("GET&" + util::url_encode("https://" + host + path) + "&" + util::url_encode(signature_base));
+  signature_base.assign("GET&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" +
+                          util::url_encode(account_->oauth_token_secret()));
 
   // set oauth_signature
   auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
@@ -165,19 +158,17 @@ void client::get(const std::string& host, const std::string& path, const std::ma
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // get
-  net::async_client client(*io_service_, *context_, host, path + "?" + query_str);
-  client.get(authorization_header, handler);
-  io_service_->run();
-
-  io_service_->reset();
+  net::async_client client(net::method::GET, url + "?" + query_str);
+  client.add_header(authorization_header);
+  client.run(handler);
 }
 
-void client::post(const std::string& host, const std::string& path, const net::response_handler& handler) {
-  post(host, path, {}, handler);
+void client::stream_post(const std::string& url, const net::response_handler& handler) {
+  stream_post(url, {}, handler);
 }
 
-void client::post(const std::string& host, const std::string& path, const std::map<std::string, std::string>& parameters,
-                  const net::response_handler& handler) {
+void client::stream_post(const std::string& url, const std::map<std::string, std::string>& parameters,
+                        const net::response_handler& handler) {
   auto auth_param = make_auth_param();
 
   std::string query_str;
@@ -197,10 +188,11 @@ void client::post(const std::string& host, const std::string& path, const std::m
     signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
   }
   signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" + util::url_encode("https://" + host + path) + "&" + util::url_encode(signature_base));
+  signature_base.assign("POST&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" +
+                          util::url_encode(account_->oauth_token_secret()));
 
   // set oauth_signature
   auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
@@ -213,11 +205,9 @@ void client::post(const std::string& host, const std::string& path, const std::m
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  net::async_client client(*io_service_, *context_, host, path);
-  client.post(authorization_header, query_str, handler);
-  io_service_->run();
-
-  io_service_->reset();
+  net::async_client client(net::method::POST, url + "?" + query_str);
+  client.add_header(authorization_header);
+  client.run(handler);
 }
 
 inline std::map<std::string, std::string> client::make_auth_param() {
