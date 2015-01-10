@@ -14,10 +14,8 @@ class async_client {
 public:
   async_client(boost::asio::io_service& io_service, boost::asio::ssl::context& context, const std::string& host, const std::string& path);
 
-  void get(const std::string& header, std::function<void(int&, std::string&)> handler);
-  void post(const std::string& header, const std::string& data, std::function<void(int&, std::string&)> handler);
-
-  response response_;
+  void get(const std::string& header, const response_handler& handler);
+  void post(const std::string& header, const std::string& data, const response_handler& handler);
 
 private:
   boost::asio::ip::tcp::resolver resolver_;
@@ -29,7 +27,8 @@ private:
   boost::asio::streambuf request_buffer_;
   boost::asio::streambuf response_buffer_;
 
-  std::function<void(int&, std::string&)> handler_;
+  response response_;
+  response_handler handler_;
 
   void handle_resolve(const boost::system::error_code& err, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
   void handle_connect(const boost::system::error_code& err);

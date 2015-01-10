@@ -23,12 +23,12 @@ public:
   net::response post(const std::string& url);
   net::response post(const std::string& url, const std::map<std::string, std::string>& parameters);
 
-  void get(const std::string& host, const std::string& path, const std::function<void(int&, std::string&)>& handler);
+  void get(const std::string& host, const std::string& path, const net::response_handler& handler);
   void get(const std::string& host, const std::string& path, const std::map<std::string, std::string>& parameters,
-           const std::function<void(int&, std::string&)>& handler);
-  void post(const std::string& host, const std::string& path, const std::function<void(int&, std::string&)>& handler);
+           const net::response_handler& handler);
+  void post(const std::string& host, const std::string& path, const net::response_handler& handler);
   void post(const std::string& host, const std::string& path, const std::map<std::string, std::string>& parameters,
-            const std::function<void(int&, std::string&)>& handler);
+            const net::response_handler& handler);
 
 private:
   std::unique_ptr<account> account_;

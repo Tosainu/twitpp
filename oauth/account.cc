@@ -54,7 +54,7 @@ int account::get_authorize_url() {
                       >> "oauth_callback_confirmed=" >> (s3 = +_w);
 
     smatch token;
-    if (regex_match(client.response().response_body, token, regex_token)) {
+    if (regex_match(client.response().body, token, regex_token)) {
       oauth_token_.assign(token[1]);
       oauth_token_secret_.assign(token[2]);
       authorize_url_.assign("https://api.twitter.com/oauth/authorize\?oauth_token=" + token[1]);
@@ -108,7 +108,7 @@ int account::get_oauth_token(const std::string& pin) {
                       >> "screen_name=" >> (s4 = +_w);
 
     smatch token;
-    if (regex_match(client.response().response_body, token, regex_token)) {
+    if (regex_match(client.response().body, token, regex_token)) {
       oauth_token_.assign(token[1]);
       oauth_token_secret_.assign(token[2]);
       return 0;

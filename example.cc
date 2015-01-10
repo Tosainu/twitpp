@@ -36,17 +36,17 @@ int main() {
 
     // update
     auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json", {{"status", "Test Tweet!"}});
-    std::cout << res.response_body << std::endl;
+    std::cout << res.body << std::endl;
 
     // userstream
-    oauth.get("userstream.twitter.com", "/1.1/user.json", [](int& status, std::string& text) {
-      if (status != 200) {
+    oauth.get("userstream.twitter.com", "/1.1/user.json", [](twitpp::net::response& response) {
+      if (response.status_code != 200) {
         std::cerr << "Error!!" << std::endl;
         return;
       }
 
-      std::cout << text << std::endl;
-      text.clear();
+      std::cout << response.body << std::endl;
+      response.body.clear();
     });
   } catch (std::exception& e) {
     std::cerr << "An exception occurred: " << e.what() << std::endl;

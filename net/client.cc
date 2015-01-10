@@ -101,13 +101,13 @@ void client::read_response(socket_ptr socket) {
     std::string field_name(header, 0, header.find(":", 0));
     std::string field_body(header, header.find(":", 0) + 2);
 
-    response_->response_header[field_name] = field_body;
+    response_->header[field_name] = field_body;
   }
 
   // read until EOF
   boost::system::error_code error;
   while(boost::asio::read(*socket, response, boost::asio::transfer_all(), error));
-  response_->response_body.assign(boost::asio::buffers_begin(response.data()), boost::asio::buffers_end(response.data()));
+  response_->body.assign(boost::asio::buffers_begin(response.data()), boost::asio::buffers_end(response.data()));
   response.consume(response.size());
 
   if(error != boost::asio::error::eof) {
