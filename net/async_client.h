@@ -20,9 +20,6 @@ public:
 
   void run(const response_handler& handler);
 
-  // void get(const std::string& header, const response_handler& handler);
-  // void post(const std::string& header, const std::string& data, const response_handler& handler);
-
 private:
   std::shared_ptr<boost::asio::io_service> io_service_;
 

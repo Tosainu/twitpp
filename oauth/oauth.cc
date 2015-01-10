@@ -203,8 +203,9 @@ void client::stream_post(const std::string& url, const std::map<std::string, std
   authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
 
   // post
-  net::async_client client(net::method::POST, url + "?" + query_str);
+  net::async_client client(net::method::POST, url);
   client.add_header(authorization_header);
+  client.add_content(query_str);
   client.run(handler);
 }
 
