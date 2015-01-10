@@ -1,5 +1,4 @@
 #include <ctime>
-#include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "../net/client.h"
 #include "../util/util.h"
@@ -148,7 +147,7 @@ inline std::map<std::string, std::string> account::make_auth_param() {
     {"oauth_consumer_key"     , consumer_key_},
     {"oauth_nonce"            , util::random_str(32)},
     {"oauth_signature_method" , "HMAC-SHA1"},
-    {"oauth_timestamp"        , boost::lexical_cast<std::string>(std::time(0))},
+    {"oauth_timestamp"        , std::to_string(std::time(0))},
     {"oauth_version"          , "1.0"}
   };
 

@@ -1,6 +1,4 @@
 #include <ctime>
-#include <tuple>
-#include <boost/lexical_cast.hpp>
 #include "../net/async_client.h"
 #include "../net/client.h"
 #include "../util/util.h"
@@ -216,7 +214,7 @@ inline std::map<std::string, std::string> client::make_auth_param() {
     {"oauth_consumer_key"     , account_->consumer_key()},
     {"oauth_nonce"            , util::random_str(32)},
     {"oauth_signature_method" , "HMAC-SHA1"},
-    {"oauth_timestamp"        , boost::lexical_cast<std::string>(std::time(0))},
+    {"oauth_timestamp"        , std::to_string(std::time(0))},
     {"oauth_token"            , account_->oauth_token()},
     {"oauth_version"          , "1.0"}
   };
