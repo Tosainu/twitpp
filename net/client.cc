@@ -96,12 +96,9 @@ void client::read_response(socket_ptr socket) {
   // read header
   boost::asio::read_until(*socket, response, "\r\n\r\n");
 
-  std::string header;
-  while (std::getline(response_stream, header) && header != "\r") {
-    std::string field_name(header, 0, header.find(":", 0));
-    std::string field_body(header, header.find(":", 0) + 2);
-
-    response_->header[field_name] = field_body;
+  for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
+    response_stream.ignore(1);  // skip space
+    std::getline(response_stream, response_->header[s]);
   }
 
   // read until EOF

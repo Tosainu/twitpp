@@ -123,12 +123,9 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
   if (!error) {
     // read response header
     std::istream response_stream(&response_buffer_);
-    std::string header;
-    while (std::getline(response_stream, header) && header != "\r") {
-      std::string field_name(header, 0, header.find(":", 0));
-      std::string field_body(header, header.find(":", 0) + 2);
-
-      response_.header[field_name] = field_body;
+    for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
+      response_stream.ignore(1);  // skip space
+      std::getline(response_stream, response_.header[s]);
     }
 
     if (response_.header.count("transfer-encoding") != 0 ||
