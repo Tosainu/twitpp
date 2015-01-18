@@ -34,7 +34,7 @@ private:
   std::ostream request_stream_;
   boost::asio::streambuf response_buffer_;
 
-  response response_;
+  std::shared_ptr<net::response> response_;
   response_handler handler_;
 
   bool content_flag_ = false;
