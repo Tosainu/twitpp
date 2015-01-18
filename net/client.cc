@@ -86,7 +86,7 @@ void client::read_response(socket_ptr socket) {
   boost::asio::read_until(*socket, response, "\r\n");
 
   std::istream response_stream(&response);
-  response_stream >> response_->http_version >> response_->status_code;
+  response_stream >> response_->http_version >> response_->status_code >> std::ws;
   std::getline(response_stream, response_->status_message);
 
   if(!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
@@ -97,8 +97,9 @@ void client::read_response(socket_ptr socket) {
   boost::asio::read_until(*socket, response, "\r\n\r\n");
 
   for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
-    response_stream.ignore(1);  // skip space
-    std::getline(response_stream, response_->header[s]);
+    response_stream >> std::ws;
+    std::getline(response_stream, response_->header[s], '\r');
+    response_stream >> std::ws;
   }
 
   // read until EOF

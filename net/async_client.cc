@@ -102,8 +102,7 @@ void async_client::handle_read_status(const boost::system::error_code& error) {
   if (!error) {
     // check response
     std::istream response_stream(&response_buffer_);
-    response_stream >> response_->http_version;
-    response_stream >> response_->status_code;
+    response_stream >> response_->http_version >> response_->status_code >> std::ws;
     std::getline(response_stream, response_->status_message);
 
     if (!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
@@ -124,12 +123,12 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
     // read response header
     std::istream response_stream(&response_buffer_);
     for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
-      response_stream.ignore(1);  // skip space
-      std::getline(response_stream, response_->header[s]);
+      response_stream >> std::ws;
+      std::getline(response_stream, response_->header[s], '\r');
+      response_stream >> std::ws;
     }
 
-    if (response_->header.count("transfer-encoding") != 0 ||
-        response_->header["transfer-encoding"] == "chunked") {
+    if (response_->header["transfer-encoding"] == "chunked") {
       // chuncked transfer
       asio::async_read_until(*socket_, response_buffer_, "\r\n",
                              boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
