@@ -1,17 +1,18 @@
 language: cpp
-branches:
-  only:
-    - master
 compiler:
   - clang
   - gcc
 script:
-  - $CXX --version
-  - make
-install:
+  - mkdir -p build && cd build
+  - cmake ..
+  - make VERBOSE=1
+before_install:
   - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
   - sudo add-apt-repository --yes ppa:boost-latest/ppa
+  - sudo add-apt-repository --yes ppa:kalakris/cmake
+install:
   - sudo apt-get -qq update
-  - sudo apt-get -qq install libboost1.55-all-dev
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8"; fi
+  - sudo apt-get -qq install g++-4.8 libboost1.55-all-dev cmake
+before_script:
+  - '[ "$CXX" = "g++" ] && export CXX="g++-4.8" && $CXX --version'
+  - cmake --version
