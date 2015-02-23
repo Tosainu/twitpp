@@ -14,5 +14,5 @@ install:
   - sudo apt-get -qq update
   - sudo apt-get -qq install g++-4.8 libboost1.55-all-dev cmake
 before_script:
-  - '[ "$CXX" = "g++" ] && export CXX="g++-4.8" && $CXX --version'
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" && $CXX --version; fi
   - cmake --version
