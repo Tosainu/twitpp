@@ -8,6 +8,9 @@ set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,now,-z,relro")
 
 find_package(Boost 1.55.0 COMPONENTS system REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(Threads REQUIRED)
+
+set(CMAKE_USE_PTHREAD_INIT 1)
 
 add_library(${PROJECT_NAME} SHARED
   net/async_client.cc
@@ -37,8 +40,8 @@ include_directories(
 target_link_libraries(${PROJECT_NAME}
   ${Boost_LIBRARIES}
   ${OPENSSL_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
   crypto
-  pthread
 )
 
 install(TARGETS ${PROJECT_NAME}
@@ -55,6 +58,6 @@ target_link_libraries(example
   ${PROJECT_NAME}
   ${Boost_LIBRARIES}
   ${OPENSSL_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
   crypto
-  pthread
 )
