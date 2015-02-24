@@ -7,10 +7,7 @@ add_definitions(-std=c++11 -Wall -Wextra)
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,now,-z,relro")
 
 find_package(Boost 1.55.0 COMPONENTS system REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-
 find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
 
 add_library(${PROJECT_NAME} SHARED
   net/async_client.cc
