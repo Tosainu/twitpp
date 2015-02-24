@@ -17,6 +17,18 @@ add_library(${PROJECT_NAME} SHARED
   util/util.cc
 )
 
+set_property(
+  TARGET ${PROJECT_NAME}
+  PROPERTY PUBLIC_HEADER
+  net/async_client.h
+  net/client.h
+  net/method.h
+  net/response.h
+  oauth/account.h
+  oauth/oauth.h
+  util/util.h
+)
+
 include_directories(
   ${Boost_INCLUDE_DIRS}
   ${OPENSSL_INCLUDE_DIR}
@@ -30,18 +42,9 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 install(TARGETS ${PROJECT_NAME}
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-)
-install(FILES
-  net/async_client.h
-  net/client.h
-  net/method.h
-  net/response.h
-  oauth/account.h
-  oauth/oauth.h
-  util/util.h
-  DESTINATION include/${PROJECT_NAME}
+  ARCHIVE       DESTINATION lib
+  LIBRARY       DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
 )
 
 #example
