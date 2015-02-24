@@ -55,6 +55,6 @@ target_link_libraries(example
   ${PROJECT_NAME}
   ${Boost_LIBRARIES}
   ${OPENSSL_LIBRARIES}
-  ${THREADS_LIBRARY}
+  ${CMAKE_THREAD_LIBS_INIT}
   crypto
 )
