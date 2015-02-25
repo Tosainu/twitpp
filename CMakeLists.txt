@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME} SHARED
   twitpp/oauth/account.cc
   twitpp/oauth/oauth.cc
   twitpp/util/util.cc
+  twitpp/twitpp.h
 )
 
 include_directories(
