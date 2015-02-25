@@ -12,7 +12,7 @@ client::client(const account& ac) : account_(new account(ac)) {}
 client::client(const account&& ac) : account_(new account(ac)) {}
 
 net::response client::get(const std::string& url) {
-  return get(url, {});
+  return get(url, std::map<std::string, std::string>());
 }
 
 net::response client::get(const std::string& url, const std::map<std::string, std::string>& parameters) {
@@ -63,7 +63,7 @@ net::response client::get(const std::string& url, const std::map<std::string, st
 }
 
 net::response client::post(const std::string& url) {
-  return post(url, {});
+  return post(url, std::map<std::string, std::string>());
 }
 
 net::response client::post(const std::string& url, const std::map<std::string, std::string>& parameters) {
@@ -115,7 +115,7 @@ net::response client::post(const std::string& url, const std::map<std::string, s
 }
 
 void client::stream_get(const std::string& url, const net::response_handler& handler) {
-  stream_get(url, {}, handler);
+  stream_get(url, std::map<std::string, std::string>(), handler);
 }
 
 void client::stream_get(const std::string& url, const std::map<std::string, std::string>& parameters,
@@ -162,7 +162,7 @@ void client::stream_get(const std::string& url, const std::map<std::string, std:
 }
 
 void client::stream_post(const std::string& url, const net::response_handler& handler) {
-  stream_post(url, {}, handler);
+  stream_post(url, std::map<std::string, std::string>(), handler);
 }
 
 void client::stream_post(const std::string& url, const std::map<std::string, std::string>& parameters,
