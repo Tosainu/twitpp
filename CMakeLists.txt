@@ -6,7 +6,7 @@ add_definitions(-std=c++11 -Wall -Wextra)
 
 if(APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "-Wl")
-  set(CMAKE_MACOSX_RPATH 1)
+  set(CMAKE_MACOSX_RPATH 0)
 else()
    set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,now,-z,relro")
 endif()
