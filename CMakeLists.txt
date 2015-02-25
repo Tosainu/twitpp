@@ -15,23 +15,11 @@ find_package(Threads REQUIRED)
 set(CMAKE_USE_PTHREAD_INIT 1)
 
 add_library(${PROJECT_NAME} SHARED
-  net/async_client.cc
-  net/client.cc
-  oauth/account.cc
-  oauth/oauth.cc
-  util/util.cc
-)
-
-set_property(
-  TARGET ${PROJECT_NAME}
-  PROPERTY PUBLIC_HEADER
-  net/async_client.h
-  net/client.h
-  net/method.h
-  net/response.h
-  oauth/account.h
-  oauth/oauth.h
-  util/util.h
+  twitpp/net/async_client.cc
+  twitpp/net/client.cc
+  twitpp/oauth/account.cc
+  twitpp/oauth/oauth.cc
+  twitpp/util/util.cc
 )
 
 include_directories(
@@ -48,6 +36,9 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE       DESTINATION lib
   LIBRARY       DESTINATION lib
-  PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
 )
 
+install(DIRECTORY twitpp/
+  DESTINATION include/${PROJECT_NAME}
+  FILES_MATCHING PATTERN "*.h"
+)
