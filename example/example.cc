@@ -1,6 +1,5 @@
 #include <iostream>
-#include "oauth/account.h"
-#include "oauth/oauth.h"
+#include <twitpp/twitpp.h>
 
 int main() {
   // set consumer key

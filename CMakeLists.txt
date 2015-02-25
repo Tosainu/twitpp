@@ -43,3 +43,5 @@ install(DIRECTORY twitpp/
   DESTINATION include/${PROJECT_NAME}
   FILES_MATCHING PATTERN "*.h"
 )
+
+add_subdirectory(example)
