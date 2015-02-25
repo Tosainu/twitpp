@@ -51,8 +51,3 @@ install(TARGETS ${PROJECT_NAME}
   PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
 )
 
-#example
-
-add_executable(example example.cc)
-
-target_link_libraries(example ${PROJECT_NAME})
