@@ -49,7 +49,6 @@ target_link_libraries(${PROJECT_NAME}
   ${Boost_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
-  crypto
 )
 
 install(TARGETS ${PROJECT_NAME}
@@ -62,10 +61,4 @@ install(TARGETS ${PROJECT_NAME}
 
 add_executable(example example.cc)
 
-target_link_libraries(example
-  ${PROJECT_NAME}
-  ${Boost_LIBRARIES}
-  ${OPENSSL_LIBRARIES}
-  ${CMAKE_THREAD_LIBS_INIT}
-  crypto
-)
+target_link_libraries(example ${PROJECT_NAME})
