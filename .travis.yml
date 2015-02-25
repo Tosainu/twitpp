@@ -3,8 +3,10 @@ compiler:
   - clang
   - gcc
 script:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" && $CXX --version; fi
+  - cmake --version
   - mkdir -p build && cd build
-  - cmake ..
+  - cmake .. -DCMAKE_BUILD_TYPE=Release
   - make VERBOSE=1
 before_install:
   - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
@@ -13,6 +15,3 @@ before_install:
 install:
   - sudo apt-get -qq update
   - sudo apt-get -qq install g++-4.8 libboost1.55-all-dev cmake
-before_script:
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" && $CXX --version; fi
-  - cmake --version

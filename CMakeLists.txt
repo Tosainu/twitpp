@@ -4,6 +4,8 @@ project(twitpp)
 
 add_definitions(-std=c++11 -Wall -Wextra)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O3")
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,now,-z,relro")
 
 find_package(Boost 1.55.0 COMPONENTS system REQUIRED)
