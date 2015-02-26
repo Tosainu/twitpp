@@ -12,8 +12,8 @@ namespace oauth {
 
 class client {
 public:
-  client(const account& ac);
-  client(const account&& ac);
+  template <typename T>
+  client(T&& ac) : account_{std::forward<T>(ac)} {}
 
   net::response get(const std::string& url);
   net::response get(const std::string& url, const std::map<std::string, std::string>& parameters);
@@ -28,7 +28,7 @@ public:
                   const net::response_handler& handler);
 
 private:
-  std::unique_ptr<account> account_;
+  account account_;
 
   inline std::map<std::string, std::string> make_auth_param();
 };
