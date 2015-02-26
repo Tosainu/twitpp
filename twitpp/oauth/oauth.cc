@@ -7,10 +7,6 @@
 namespace twitpp {
 namespace oauth {
 
-client::client(const account& ac) : account_(new account(ac)) {}
-
-client::client(const account&& ac) : account_(new account(ac)) {}
-
 net::response client::get(const std::string& url) {
   return get(url, {});
 }
@@ -38,7 +34,7 @@ net::response client::get(const std::string& url, const std::map<std::string, st
   signature_base.assign("GET&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_.consumer_secret()) + "&" + util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
   auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
@@ -89,7 +85,7 @@ net::response client::post(const std::string& url, const std::map<std::string, s
   signature_base.assign("POST&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" + util::url_encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_.consumer_secret()) + "&" + util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
   auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
@@ -142,8 +138,8 @@ void client::stream_get(const std::string& url, const std::map<std::string, std:
   signature_base.assign("GET&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" +
-                          util::url_encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_.consumer_secret()) + "&" +
+                          util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
   auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
@@ -189,8 +185,8 @@ void client::stream_post(const std::string& url, const std::map<std::string, std
   signature_base.assign("POST&" + util::url_encode(url) + "&" + util::url_encode(signature_base));
 
   // generate signing key
-  std::string signing_key(util::url_encode(account_->consumer_secret()) + "&" +
-                          util::url_encode(account_->oauth_token_secret()));
+  std::string signing_key(util::url_encode(account_.consumer_secret()) + "&" +
+                          util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
   auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
@@ -212,11 +208,11 @@ void client::stream_post(const std::string& url, const std::map<std::string, std
 inline std::map<std::string, std::string> client::make_auth_param() {
   return std::map<std::string, std::string>{
     {"oauth_callback"         , "oob"},
-    {"oauth_consumer_key"     , account_->consumer_key()},
+    {"oauth_consumer_key"     , account_.consumer_key()},
     {"oauth_nonce"            , util::random_str(32)},
     {"oauth_signature_method" , "HMAC-SHA1"},
     {"oauth_timestamp"        , std::to_string(std::time(0))},
-    {"oauth_token"            , account_->oauth_token()},
+    {"oauth_token"            , account_.oauth_token()},
     {"oauth_version"          , "1.0"}
   };
 }
