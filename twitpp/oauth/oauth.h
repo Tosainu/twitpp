@@ -15,10 +15,8 @@ public:
   template <typename T>
   client(T&& ac) : account_{std::forward<T>(ac)} {}
 
-  net::response get(const std::string& url);
-  net::response get(const std::string& url, const std::map<std::string, std::string>& parameters);
-  net::response post(const std::string& url);
-  net::response post(const std::string& url, const std::map<std::string, std::string>& parameters);
+  net::response get(const std::string& url, const std::map<std::string, std::string>& parameters = decltype(parameters){});
+  net::response post(const std::string& url, const std::map<std::string, std::string>& parameters = decltype(parameters){});
 
   void stream_get(const std::string& url, const net::response_handler& handler);
   void stream_get(const std::string& url, const std::map<std::string, std::string>& parameters,
