@@ -7,10 +7,6 @@
 namespace twitpp {
 namespace oauth {
 
-net::response client::get(const std::string& url) {
-  return get(url, std::map<std::string, std::string>());
-}
-
 net::response client::get(const std::string& url, const std::map<std::string, std::string>& parameters) {
   auto auth_param = make_auth_param();
 
@@ -56,10 +52,6 @@ net::response client::get(const std::string& url, const std::map<std::string, st
   } catch (std::exception& e) {
     throw;
   }
-}
-
-net::response client::post(const std::string& url) {
-  return post(url, std::map<std::string, std::string>());
 }
 
 net::response client::post(const std::string& url, const std::map<std::string, std::string>& parameters) {

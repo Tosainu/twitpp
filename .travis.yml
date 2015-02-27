@@ -13,5 +13,5 @@ before_install:
   - sudo add-apt-repository --yes ppa:boost-latest/ppa
   - sudo add-apt-repository --yes ppa:kalakris/cmake
 install:
-  - sudo apt-get -qq update
-  - sudo apt-get -qq install g++-4.8 libboost1.55-all-dev cmake
+  - travis_retry sudo apt-get -qq update
+  - travis_retry sudo apt-get -qq install g++-4.8 libboost1.55-all-dev cmake
