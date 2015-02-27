@@ -7,7 +7,7 @@
 namespace twitpp {
 namespace oauth {
 
-net::response client::get(const std::string& url, const std::map<std::string, std::string>& parameters) {
+net::response client::get(const std::string& url, const param_t& parameters) {
   auto auth_param = make_auth_param();
 
   std::string query_str;
@@ -54,7 +54,7 @@ net::response client::get(const std::string& url, const std::map<std::string, st
   }
 }
 
-net::response client::post(const std::string& url, const std::map<std::string, std::string>& parameters) {
+net::response client::post(const std::string& url, const param_t& parameters) {
   auto auth_param = make_auth_param();
 
   std::string query_str;
@@ -103,10 +103,10 @@ net::response client::post(const std::string& url, const std::map<std::string, s
 }
 
 void client::stream_get(const std::string& url, const net::response_handler& handler) {
-  stream_get(url, std::map<std::string, std::string>(), handler);
+  stream_get(url, param_t{}, handler);
 }
 
-void client::stream_get(const std::string& url, const std::map<std::string, std::string>& parameters,
+void client::stream_get(const std::string& url, const param_t& parameters,
                        const net::response_handler& handler) {
   auto auth_param = make_auth_param();
 
@@ -150,10 +150,10 @@ void client::stream_get(const std::string& url, const std::map<std::string, std:
 }
 
 void client::stream_post(const std::string& url, const net::response_handler& handler) {
-  stream_post(url, std::map<std::string, std::string>(), handler);
+  stream_post(url, param_t{}, handler);
 }
 
-void client::stream_post(const std::string& url, const std::map<std::string, std::string>& parameters,
+void client::stream_post(const std::string& url, const param_t& parameters,
                         const net::response_handler& handler) {
   auto auth_param = make_auth_param();
 
@@ -197,8 +197,8 @@ void client::stream_post(const std::string& url, const std::map<std::string, std
   client.run(handler);
 }
 
-inline std::map<std::string, std::string> client::make_auth_param() {
-  return std::map<std::string, std::string>{
+inline param_t client::make_auth_param() {
+  return param_t{
     {"oauth_callback"         , "oob"},
     {"oauth_consumer_key"     , account_.consumer_key()},
     {"oauth_nonce"            , util::random_str(32)},

@@ -10,9 +10,9 @@
 namespace twitpp {
 namespace oauth {
 
-class client {
-  using param_t = std::map<std::string, std::string>;
+using param_t = std::map<std::string, std::string>;
 
+class client {
 public:
   template <typename T>
   client(T&& ac) : account_{std::forward<T>(ac)} {}
@@ -30,7 +30,7 @@ public:
 private:
   account account_;
 
-  inline std::map<std::string, std::string> make_auth_param();
+  inline param_t make_auth_param();
 };
 
 }
