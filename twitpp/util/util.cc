@@ -85,6 +85,7 @@ std::string url_encode(const std::string& text) {
 
   return result.str();
 }
+
 boost::optional<url_t> url_parser(const std::string& url) {
   using namespace boost::xpressive;
 
@@ -99,5 +100,5 @@ boost::optional<url_t> url_parser(const std::string& url) {
   }
 }
 
-}
-}
+} // namespace util
+} // namespace twitpp

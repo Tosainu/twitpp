@@ -47,7 +47,7 @@ private:
   std::shared_ptr<net::response> response_;
 };
 
-}
-}
+} // namespace net
+} // namespace twitpp
 
 #endif

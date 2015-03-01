@@ -226,5 +226,6 @@ void async_client::handle_read_content_all(const boost::system::error_code& erro
     std::cerr << "twitpp::net::async_client: " << "read content all failed: " << error.value() << std::endl;
   }
 }
-}
-}
+
+} // namespace net
+} // namespace twitpp

@@ -34,7 +34,7 @@ private:
   inline std::map<std::string, std::string> make_auth_param();
 };
 
-}
-}
+} // namespace oauth
+} // namespace twitpp
 
 #endif

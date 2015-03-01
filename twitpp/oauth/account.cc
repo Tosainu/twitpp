@@ -158,5 +158,5 @@ inline std::map<std::string, std::string> account::make_auth_param() {
   return auth_param;
 }
 
-}
-}
+} // namespace oauth
+} // namespace twitpp

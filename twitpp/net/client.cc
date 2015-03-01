@@ -117,5 +117,5 @@ net::response& client::response() {
   return *response_;
 }
 
-}
-}
+} // namespace net
+} // namespace twitpp

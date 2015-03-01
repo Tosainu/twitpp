@@ -51,7 +51,7 @@ private:
   void handle_read_content_all(const boost::system::error_code& err);
 };
 
-}
-}
+} // namespace net
+} // namespace twitpp
 
 #endif

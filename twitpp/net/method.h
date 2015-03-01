@@ -9,7 +9,7 @@ enum class method {
   POST,
 };
 
-}
-}
+} // namespace net
+} // namespace twitpp
 
 #endif

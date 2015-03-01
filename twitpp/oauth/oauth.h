@@ -33,7 +33,7 @@ private:
   inline param_t make_auth_param();
 };
 
-}
-}
+} // namespace oauth
+} // namespace twitpp
 
 #endif

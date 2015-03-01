@@ -16,7 +16,7 @@ struct response {
 
 using response_handler = std::function<void(response&)>;
 
-}
-}
+} // namespace net
+} // namespace twitpp
 
 #endif

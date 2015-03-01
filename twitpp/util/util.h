@@ -19,7 +19,7 @@ std::string url_encode(const std::string& text);
 using url_t = std::tuple<std::string, std::string, std::string, std::string>;
 boost::optional<url_t> url_parser(const std::string& url);
 
-}
-}
+} // namespace util
+} // namespace twitpp
 
 #endif

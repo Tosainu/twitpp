@@ -209,5 +209,5 @@ inline param_t client::make_auth_param() {
   };
 }
 
-}
-}
+} // namespace oauth
+} // namespace twitpp
