@@ -2,39 +2,40 @@
 #include <boost/xpressive/xpressive.hpp>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include <openssl/sha.h>
 #include "util.h"
 
 namespace twitpp {
 namespace util {
 
-std::string base64_encode(const std::string& text) {
+std::string base64_encode(const unsigned char* data, unsigned int length) {
   const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   std::string result;
 
-  for (std::size_t cnt = 0; cnt < text.size(); ++cnt) {
-    switch (cnt % 3) {
+  for (unsigned int i = 0; i < length; ++i) {
+    switch (i % 3) {
       case 0:
-        result.push_back(charset[(text[cnt] & 0xFC) >> 2]);
+        result.push_back(charset[(data[i] & 0xFC) >> 2]);
 
-        if ((cnt + 1) == text.size()) {
-          result.push_back(charset[(text[cnt] & 0x03) << 4]);
+        if ((i + 1) == length) {
+          result.push_back(charset[(data[i] & 0x03) << 4]);
           result.push_back('=');
           result.push_back('=');
         }
         break;
 
       case 1:
-        result.push_back(charset[((text[cnt - 1] & 0x03) << 4) | ((text[cnt] & 0xF0) >> 4)]);
+        result.push_back(charset[((data[i - 1] & 0x03) << 4) | ((data[i] & 0xF0) >> 4)]);
 
-        if ((cnt + 1) == text.size()) {
-          result.push_back(charset[(text[cnt] & 0x0F) << 2]);
+        if ((i + 1) == length) {
+          result.push_back(charset[(data[i] & 0x0F) << 2]);
           result.push_back('=');
         }
         break;
 
       case 2:
-        result.push_back(charset[((text[cnt - 1] & 0x0F) << 2) | ((text[cnt] & 0xC0) >> 6)]);
-        result.push_back(charset[text[cnt] & 0x3F]);
+        result.push_back(charset[((data[i - 1] & 0x0F) << 2) | ((data[i] & 0xC0) >> 6)]);
+        result.push_back(charset[data[i] & 0x3F]);
 
         break;
     }
@@ -44,9 +45,15 @@ std::string base64_encode(const std::string& text) {
 }
 
 std::string hmac_sha1_encode(const std::string& key, const std::string& data) {
-  return static_cast<std::string>((char*)
-    HMAC(EVP_sha1(), (unsigned char*)key.c_str(), key.length(), (unsigned char*)data.c_str(), data.length(), nullptr, nullptr)
-  );
+  unsigned char result[SHA_DIGEST_LENGTH + 1];
+  unsigned int length;
+
+  HMAC(EVP_sha1(),
+       reinterpret_cast<const unsigned char*>(key.c_str()), key.length(),
+       reinterpret_cast<const unsigned char*>(data.c_str()), data.length(),
+       result, &length);
+
+  return base64_encode(result, length);
 }
 
 std::string random_str(unsigned int length) {
@@ -78,7 +85,6 @@ std::string url_encode(const std::string& text) {
 
   return result.str();
 }
-
 boost::optional<url_t> url_parser(const std::string& url) {
   using namespace boost::xpressive;
 

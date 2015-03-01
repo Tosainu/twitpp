@@ -8,11 +8,11 @@
 namespace twitpp {
 namespace util {
 
-std::string random_str(unsigned int length);
-
-std::string base64_encode(const std::string& text);
+std::string base64_encode(const unsigned char* data, std::size_t length);
 
 std::string hmac_sha1_encode(const std::string& key, const std::string& data);
+
+std::string random_str(unsigned int length);
 
 std::string url_encode(const std::string& text);
 

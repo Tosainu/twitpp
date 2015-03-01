@@ -33,7 +33,7 @@ net::response client::get(const std::string& url, const param_t& parameters) {
   std::string signing_key(util::url_encode(account_.consumer_secret()) + "&" + util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::hmac_sha1_encode(signing_key, signature_base);
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
@@ -80,7 +80,7 @@ net::response client::post(const std::string& url, const param_t& parameters) {
   std::string signing_key(util::url_encode(account_.consumer_secret()) + "&" + util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::hmac_sha1_encode(signing_key, signature_base);
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
@@ -134,7 +134,7 @@ void client::stream_get(const std::string& url, const param_t& parameters,
                           util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::hmac_sha1_encode(signing_key, signature_base);
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
@@ -181,7 +181,7 @@ void client::stream_post(const std::string& url, const param_t& parameters,
                           util::url_encode(account_.oauth_token_secret()));
 
   // set oauth_signature
-  auth_param["oauth_signature"] = util::base64_encode(util::hmac_sha1_encode(signing_key, signature_base));
+  auth_param["oauth_signature"] = util::hmac_sha1_encode(signing_key, signature_base);
 
   // generate authorization_header
   std::string authorization_header("Authorization: OAuth ");
