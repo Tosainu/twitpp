@@ -13,10 +13,7 @@ namespace net {
 
 class async_client {
 public:
-  async_client(const net::method& method, const std::string& url);
-
-  void add_header(const std::string& header);
-  void add_content(const std::string& content);
+  async_client(const net::method& method, const std::string& url, const std::string& header, const std::string& data);
 
   void run(const response_handler& handler);
 
@@ -36,8 +33,6 @@ private:
 
   std::shared_ptr<net::response> response_;
   response_handler handler_;
-
-  bool content_flag_ = false;
 
   void handle_resolve(const boost::system::error_code& err, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
   void handle_connect(const boost::system::error_code& err);

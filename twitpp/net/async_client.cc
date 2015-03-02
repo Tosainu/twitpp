@@ -8,7 +8,7 @@ namespace net {
 
 namespace asio = boost::asio;
 
-async_client::async_client(const net::method& method, const std::string& url)
+async_client::async_client(const net::method& method, const std::string& url, const std::string& header, const std::string& data)
     : io_service_(std::make_shared<boost::asio::io_service>()), context_(boost::asio::ssl::context_base::tlsv12),
       resolver_(*io_service_), request_stream_(&request_), response_(std::make_shared<net::response>()) {
   auto parsed_url = util::url_parser(url);
@@ -24,7 +24,13 @@ async_client::async_client(const net::method& method, const std::string& url)
 
   switch (method) {
     case net::method::GET:
-      request_stream_ << "GET " << std::get<2>(*parsed_url) << std::get<3>(*parsed_url) << " HTTP/1.1\r\n";
+      request_stream_ << "GET " << std::get<2>(*parsed_url);
+
+      if (!data.empty()) {
+        request_stream_ << "?" << data;
+      }
+
+      request_stream_ << " HTTP/1.1\r\n";
       break;
     case net::method::POST:
       request_stream_ << "POST " << std::get<2>(*parsed_url) << std::get<3>(*parsed_url) << " HTTP/1.1\r\n";
@@ -33,28 +39,23 @@ async_client::async_client(const net::method& method, const std::string& url)
 
   request_stream_ << "Host: " << std::get<1>(*parsed_url) << "\r\n";
   request_stream_ << "Accept: */*\r\n";
-}
 
-void async_client::add_header(const std::string& header) {
-  request_stream_ << header << "\r\n";
-}
+  if (!header.empty()) {
+    request_stream_ << header << "\r\n";
+  }
 
-void async_client::add_content(const std::string& content) {
-  if (!content_flag_) {
-    request_stream_ << "Content-Length: " << content.length() << "\r\n";
+  if (method == net::method::POST && !data.empty()) {
+    request_stream_ << "Content-Length: " << data.length() << "\r\n";
     request_stream_ << "Content-Type: application/x-www-form-urlencoded\r\n";
     request_stream_ << "Connection: close\r\n\r\n";
-    request_stream_ << content << "\r\n";
-    content_flag_ = true;
+    request_stream_ << data << "\r\n";
+  } else {
+    request_stream_ << "Connection: close\r\n\r\n";
   }
 }
 
 void async_client::run(const response_handler& handler) {
   handler_ = handler;
-
-  if (!content_flag_) {
-    request_stream_ << "Connection: close\r\n\r\n" << std::flush;
-  }
 
   // name resolving
   resolver_.async_resolve(

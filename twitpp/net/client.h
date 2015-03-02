@@ -15,10 +15,7 @@ namespace net {
 
 class client {
 public:
-  client(const net::method& method, const std::string& url);
-
-  void add_header(const std::string& header);
-  void add_content(const std::string& content);
+  client(const net::method& method, const std::string& url, const std::string& header, const std::string& data);
 
   void run();
 
@@ -41,8 +38,6 @@ private:
 
   boost::asio::streambuf request_;
   std::ostream request_stream_;
-
-  bool content_flag_ = false;
 
   std::shared_ptr<net::response> response_;
 };
