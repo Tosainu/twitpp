@@ -89,11 +89,10 @@ std::string url_encode(const std::string& text) {
 boost::optional<url_t> url_parser(const std::string& url) {
   using namespace boost::xpressive;
 
-  sregex url_parser = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *~(set = '?')) >> (s4 = *_);
+  sregex regex = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *~(set = '?')) >> (s4 = *_);
   smatch res;
-  std::string path;
 
-  if (regex_search(url, res, url_parser)) {
+  if (regex_search(url, res, regex)) {
     return std::make_tuple(res.str(1), res.str(2), res[3].length() == 0 ? "/" : res.str(3), res.str(4));
   } else {
     return boost::none;
