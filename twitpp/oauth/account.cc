@@ -7,25 +7,15 @@
 namespace twitpp {
 namespace oauth {
 
-account::account(const std::string& consumer_key, const std::string& consumer_secret)
-  : consumer_key_(consumer_key), consumer_secret_(consumer_secret) {}
-
-account::account(const std::string& consumer_key, const std::string& consumer_secret,
-                 const std::string& oauth_token, const std::string& oauth_token_secret)
-  : consumer_key_(consumer_key), consumer_secret_(consumer_secret),
-    oauth_token_(oauth_token), oauth_token_secret_(oauth_token_secret) {}
+account::account(const std::string& ck, const std::string& cs, const std::string& ot, const std::string& os)
+    : consumer_key_(ck), consumer_secret_(cs), oauth_token_(ot), oauth_token_secret_(os) {}
 
 int account::get_authorize_url() {
   auto auth_param = make_auth_param();
 
   // generate signature_base
-  std::string signature_base;
-  for (auto&& param : auth_param) {
-    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
-  }
-  signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" + util::url_encode("https://api.twitter.com/oauth/request_token") + "&" +
-                        util::url_encode(signature_base));
+  std::string signature_base("POST&" + util::url_encode("https://api.twitter.com/oauth/request_token") + "&" +
+                             util::url_encode(make_query_str(auth_param)));
 
   // generate signing key
   std::string signing_key(util::url_encode(consumer_secret_) + "&");
@@ -33,17 +23,9 @@ int account::get_authorize_url() {
   // set oauth_signature
   auth_param["oauth_signature"] = util::hmac_sha1_encode(signing_key, signature_base);
 
-  // generate authorization_header
-  std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : auth_param) {
-    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
-  }
-  authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
-
   // post
   try {
-    net::client client(net::method::POST, "https://api.twitter.com/oauth/request_token");
-    client.add_header(authorization_header);
+    net::client client(net::method::POST, "https://api.twitter.com/oauth/request_token", make_auth_header(auth_param), "");
     client.run();
 
     using namespace boost::xpressive;
@@ -54,9 +36,9 @@ int account::get_authorize_url() {
 
     smatch token;
     if (regex_match(client.response().body, token, regex_token)) {
-      oauth_token_.assign(token[1]);
-      oauth_token_secret_.assign(token[2]);
-      authorize_url_.assign("https://api.twitter.com/oauth/authorize\?oauth_token=" + token[1]);
+      oauth_token_.assign(token.str(1));
+      oauth_token_secret_.assign(token.str(2));
+      authorize_url_.assign("https://api.twitter.com/oauth/authorize\?oauth_token=" + token.str(1));
       return 0;
     } else {
       authorize_url_.clear();
@@ -72,13 +54,8 @@ int account::get_oauth_token(const std::string& pin) {
   auth_param["oauth_verifier"] = pin;
 
   // generate signature_base
-  std::string signature_base;
-  for (auto&& param : auth_param) {
-    signature_base.append(param.first + "=" + util::url_encode(param.second) + "&");
-  }
-  signature_base.erase(signature_base.end() - 1, signature_base.end());
-  signature_base.assign("POST&" + util::url_encode("https://api.twitter.com/oauth/access_token") + "&" +
-                        util::url_encode(signature_base));
+  std::string signature_base("POST&" + util::url_encode("https://api.twitter.com/oauth/access_token") + "&" +
+                             util::url_encode(make_query_str(auth_param)));
 
   // generate signing key
   std::string signing_key(util::url_encode(consumer_secret_) + "&" + util::url_encode(oauth_token_secret_));
@@ -86,17 +63,9 @@ int account::get_oauth_token(const std::string& pin) {
   // set oauth_signature
   auth_param["oauth_signature"] = util::hmac_sha1_encode(signing_key, signature_base);
 
-  // generate authorization_header
-  std::string authorization_header("Authorization: OAuth ");
-  for (auto&& param : auth_param) {
-    authorization_header.append(param.first + "=\"" + util::url_encode(param.second) + "\", ");
-  }
-  authorization_header.erase(authorization_header.end() - 2, authorization_header.end());
-
   // post
   try {
-    net::client client(net::method::POST, "https://api.twitter.com/oauth/access_token");
-    client.add_header(authorization_header);
+    net::client client(net::method::POST, "https://api.twitter.com/oauth/access_token", make_auth_header(auth_param), "");
     client.run();
 
     using namespace boost::xpressive;
@@ -108,8 +77,8 @@ int account::get_oauth_token(const std::string& pin) {
 
     smatch token;
     if (regex_match(client.response().body, token, regex_token)) {
-      oauth_token_.assign(token[1]);
-      oauth_token_secret_.assign(token[2]);
+      oauth_token_.assign(token.str(1));
+      oauth_token_secret_.assign(token.str(2));
       return 0;
     } else {
       oauth_token_.clear();
@@ -139,6 +108,26 @@ std::string account::oauth_token() const {
 
 std::string account::oauth_token_secret() const {
   return oauth_token_secret_;
+}
+
+std::string account::make_query_str(const std::map<std::string, std::string>& param) {
+  std::string s;
+
+  for (auto&& p : param) {
+    s.append(p.first + "=" + util::url_encode(p.second) + "&");
+  };
+
+  return s.erase(s.length() - 1);
+}
+
+std::string account::make_auth_header(const std::map<std::string, std::string>& param) {
+  std::string s("Authorization: OAuth ");
+
+  for (auto&& p : param) {
+    s.append(p.first + "=\"" + util::url_encode(p.second) + "\", ");
+  };
+
+  return s.erase(s.length() - 2);
 }
 
 inline std::map<std::string, std::string> account::make_auth_param() {
