@@ -167,8 +167,7 @@ void async_client::handle_read_chunk_size(const boost::system::error_code& error
                              boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
     } else {
       // read chunk size
-      std::size_t chunk_size = std::stoi(static_cast<std::string>(asio::buffer_cast<const char*>(response_buffer_.data())),
-                                         nullptr, 16);
+      std::size_t chunk_size = std::strtoul(asio::buffer_cast<const char*>(response_buffer_.data()), nullptr, 16);
       response_buffer_.consume(chunk_size);
 
       if (chunk_size > 0) {
