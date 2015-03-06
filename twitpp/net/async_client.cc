@@ -1,6 +1,6 @@
 #include <iostream>
 #include <boost/bind.hpp>
-#include "..//util/util.h"
+#include "../util/util.h"
 #include "async_client.h"
 
 namespace twitpp {
