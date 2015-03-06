@@ -205,7 +205,7 @@ void async_client::handle_read_chunk_body(std::size_t content_length, const boos
 void async_client::handle_read_content(std::size_t content_length, const boost::system::error_code& error) {
   if (!error) {
     response_->body.append(asio::buffers_begin(response_buffer_.data()), asio::buffers_end(response_buffer_.data()));
-    response_buffer_.consume(response_buffer_.size());
+    response_buffer_.consume(content_length);
     handler_(*response_);
   } else if (error != asio::error::eof) {
     std::cerr << "twitpp::net::async_client: " << "read content failed: " << error.value() << std::endl;
