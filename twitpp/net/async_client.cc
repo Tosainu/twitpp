@@ -14,7 +14,8 @@ async_client::async_client(const net::method& method, const std::string& url, co
   auto parsed_url = util::url_parser(url);
 
   if (!parsed_url) {
-    throw std::invalid_argument("failed to parse the url");
+    std::cerr << "error: failed to parse the url" << std::endl;
+    return;
   }
 
   context_.set_verify_mode(boost::asio::ssl::verify_none);
@@ -65,95 +66,99 @@ void async_client::run(const response_handler& handler) {
 }
 
 void async_client::handle_resolve(const boost::system::error_code& error, asio::ip::tcp::resolver::iterator endpoint_iterator) {
-  if (!error) {
-    asio::async_connect(socket_->lowest_layer(), endpoint_iterator,
-                        boost::bind(&async_client::handle_connect, this, asio::placeholders::error));
-  } else {
-    std::cerr << "twitpp::net::async_client: " << "resolve failed: " << error.value() << std::endl;
+  if (error) {
+    std::cerr << "failed to resolve: " << error.message() << std::endl;
+    return;
   }
+
+  asio::async_connect(socket_->lowest_layer(), endpoint_iterator,
+                      boost::bind(&async_client::handle_connect, this, asio::placeholders::error));
 }
 
 void async_client::handle_connect(const boost::system::error_code& error) {
-  if (!error) {
-    socket_->async_handshake(asio::ssl::stream_base::client,
-                            boost::bind(&async_client::handle_handshake, this, asio::placeholders::error));
-  } else {
-    std::cerr << "twitpp::net::async_client: " << "connect failed: " << error.value() << std::endl;
+  if (error) {
+    std::cerr << "failed to connect : " << error.message() << std::endl;
+    return;
   }
+
+  socket_->async_handshake(asio::ssl::stream_base::client,
+                           boost::bind(&async_client::handle_handshake, this, asio::placeholders::error));
 }
 
 void async_client::handle_handshake(const boost::system::error_code& error) {
-  if (!error) {
-    asio::async_write(*socket_, request_, boost::bind(&async_client::handle_write, this, asio::placeholders::error));
-  } else {
-    std::cerr << "twitpp::net::async_client: " << "handshake failed: " << error.value() << std::endl;
+  if (error) {
+    std::cerr << "failed to handshake: " << error.message() << std::endl;
+    return;
   }
+
+  asio::async_write(*socket_, request_, boost::bind(&async_client::handle_write, this, asio::placeholders::error));
 }
 
 void async_client::handle_write(const boost::system::error_code& error) {
-  if (!error) {
-    asio::async_read_until(*socket_, response_buffer_, "\r\n",
-                           boost::bind(&async_client::handle_read_status, this, asio::placeholders::error));
-  } else {
-    std::cerr << "twitpp::net::async_client: " << "write failed: " << error.value() << std::endl;
+  if (error) {
+    std::cerr << "failed to write: " << error.message() << std::endl;
+    return;
   }
+
+  asio::async_read_until(*socket_, response_buffer_, "\r\n",
+                         boost::bind(&async_client::handle_read_status, this, asio::placeholders::error));
 }
 
 void async_client::handle_read_status(const boost::system::error_code& error) {
-  if (!error) {
-    // check response
-    std::istream response_stream(&response_buffer_);
-    response_stream >> response_->http_version >> response_->status_code >> std::ws;
-    std::getline(response_stream, response_->status_message);
-
-    if (!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
-      std::cerr << "twitpp::net::async_client: " << "invalid response" << std::endl;
-      return;
-    }
-
-    // read response header
-    asio::async_read_until(*socket_, response_buffer_, "\r\n\r\n",
-                           boost::bind(&async_client::handle_read_header, this, asio::placeholders::error));
-  } else {
-    std::cerr << "twitpp::net::async_client: " << "read status failed: " << error.value() << std::endl;
+  if (error) {
+    std::cerr << "failed to read status: " << error.message() << std::endl;
+    return;
   }
+
+  std::istream response_stream(&response_buffer_);
+  response_stream >> response_->http_version >> response_->status_code >> std::ws;
+  std::getline(response_stream, response_->status_message);
+
+  // check response
+  if (!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
+    std::cerr << "error: invalid response" << std::endl;
+    return;
+  }
+
+  asio::async_read_until(*socket_, response_buffer_, "\r\n\r\n",
+                         boost::bind(&async_client::handle_read_header, this, asio::placeholders::error));
 }
 
 void async_client::handle_read_header(const boost::system::error_code& error) {
-  if (!error) {
-    // read response header
-    std::istream response_stream(&response_buffer_);
-    for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
-      response_stream >> std::ws;
-      std::getline(response_stream, response_->header[s], '\r');
-      response_stream >> std::ws;
-    }
+  if (error) {
+    std::cerr << "failed to read header: " << error.message() << std::endl;
+    return;
+  }
 
-    if (response_->header["transfer-encoding"] == "chunked") {
-      // chuncked transfer
-      asio::async_read_until(*socket_, response_buffer_, "\r\n",
-                             boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
-    } else if (response_->header.count("Content-Length") != 0) {
-      // use content length
-      std::size_t content_length = std::stoi(response_->header["Content-Length"]);
+  // read response header
+  std::istream response_stream(&response_buffer_);
+  for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
+    response_stream >> std::ws;
+    std::getline(response_stream, response_->header[s], '\r');
+    response_stream >> std::ws;
+  }
 
-      asio::async_read(*socket_, response_buffer_,
-                       asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
-                       boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
-    } else if (response_->header.count("content-length") != 0) {
-      std::size_t content_length = std::stoi(response_->header["content-length"]);
+  if (response_->header["transfer-encoding"] == "chunked") {
+    // chuncked transfer
+    asio::async_read_until(*socket_, response_buffer_, "\r\n",
+                           boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
+  } else if (response_->header.count("Content-Length") != 0) {
+    // use content length
+    std::size_t content_length = std::stoi(response_->header["Content-Length"]);
 
-      asio::async_read(*socket_, response_buffer_,
-                       asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
-                       boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
-    } else {
-      // other (not working now
-      asio::async_read(*socket_, response_buffer_, asio::transfer_all(),
-                       boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
-    }
+    asio::async_read(*socket_, response_buffer_,
+                     asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
+                     boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
+  } else if (response_->header.count("content-length") != 0) {
+    std::size_t content_length = std::stoi(response_->header["content-length"]);
 
+    asio::async_read(*socket_, response_buffer_,
+                     asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
+                     boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
   } else {
-    std::cerr << "twitpp::net::async_client: " << "read header failed: " << error.value() << std::endl;
+    // other (not working now
+    asio::async_read(*socket_, response_buffer_, asio::transfer_all(),
+                     boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
   }
 }
 
@@ -181,7 +186,7 @@ void async_client::handle_read_chunk_size(const boost::system::error_code& error
       }
     }
   } else if (error != asio::error::eof) {
-    std::cerr << "twitpp::net::async_client: " << "read chunksize failed: " << error.value() << std::endl;
+    std::cerr << "failed to read chunksize: " << error.message() << std::endl;
   }
 }
 
@@ -198,7 +203,7 @@ void async_client::handle_read_chunk_body(std::size_t content_length, const boos
     asio::async_read_until(*socket_, response_buffer_, "\r\n",
                            boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
-    std::cerr << "twitpp::net::async_client: " << "read chunk failed: " << error.value() << std::endl;
+    std::cerr << "failed to read chunk: " << error.message() << std::endl;
   }
 }
 
@@ -208,7 +213,7 @@ void async_client::handle_read_content(std::size_t content_length, const boost::
     response_buffer_.consume(content_length);
     handler_(*response_);
   } else if (error != asio::error::eof) {
-    std::cerr << "twitpp::net::async_client: " << "read content failed: " << error.value() << std::endl;
+    std::cerr << "failed to read content: " << error.message() << std::endl;
   }
 }
 
@@ -223,7 +228,7 @@ void async_client::handle_read_content_all(const boost::system::error_code& erro
     asio::async_read(*socket_, response_buffer_, asio::transfer_at_least(1),
                      boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
-    std::cerr << "twitpp::net::async_client: " << "read content all failed: " << error.value() << std::endl;
+    std::cerr << "failed to read content: " << error.message() << std::endl;
   }
 }
 
