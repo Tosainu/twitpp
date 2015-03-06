@@ -3,7 +3,6 @@
 
 #include <map>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
@@ -22,22 +21,16 @@ public:
   net::response& response();
 
 private:
-  template <typename socket_ptr>
-  void read_response(socket_ptr socket);
+  template <typename SocketPtr>
+  void read_response(SocketPtr socket);
 
   std::shared_ptr<boost::asio::io_service> io_service_;
-
-  boost::asio::ssl::context context_;
-
-  std::shared_ptr<boost::asio::ip::tcp::socket> socket_;
-  std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> socket_ssl_;
-
-  boost::asio::ip::tcp::resolver resolver_;
-
   std::shared_ptr<boost::asio::ip::tcp::resolver::query> query_;
 
   boost::asio::streambuf request_;
-  std::ostream request_stream_;
+
+  std::shared_ptr<boost::asio::ip::tcp::socket> socket_;
+  std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> socket_ssl_;
 
   std::shared_ptr<net::response> response_;
 };

@@ -1,3 +1,4 @@
+#include <ostream>
 #include <stdexcept>
 #include <tuple>
 #include "../util/util.h"
@@ -7,8 +8,7 @@ namespace twitpp {
 namespace net {
 
 client::client(const net::method& method, const std::string& url, const std::string& header, const std::string& data)
-  : io_service_(std::make_shared<boost::asio::io_service>()), context_(boost::asio::ssl::context_base::tlsv12),
-    resolver_(*io_service_), request_stream_(&request_), response_(std::make_shared<net::response>()) {
+  : io_service_(std::make_shared<boost::asio::io_service>()), response_(std::make_shared<net::response>()) {
   auto parsed_url = util::url_parser(url);
 
   if (!parsed_url) {
@@ -16,10 +16,11 @@ client::client(const net::method& method, const std::string& url, const std::str
   }
 
   if (std::get<0>(*parsed_url) == "https") {
-    context_.set_verify_mode(boost::asio::ssl::verify_none);
+    boost::asio::ssl::context context(boost::asio::ssl::context_base::tlsv12);
+    context.set_verify_mode(boost::asio::ssl::verify_none);
 
     socket_ = nullptr;
-    socket_ssl_ = std::make_shared<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>(*io_service_, context_);
+    socket_ssl_ = std::make_shared<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>(*io_service_, context);
   } else {
     socket_ = std::make_shared<boost::asio::ip::tcp::socket>(*io_service_);
     socket_ssl_ = nullptr;
@@ -27,41 +28,44 @@ client::client(const net::method& method, const std::string& url, const std::str
 
   query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(std::get<1>(*parsed_url), std::get<0>(*parsed_url));
 
+  std::ostream request_stream(&request_);
+
   switch (method) {
     case net::method::GET:
-      request_stream_ << "GET " << std::get<2>(*parsed_url);
+      request_stream << "GET " << std::get<2>(*parsed_url);
 
       if (!data.empty()) {
-        request_stream_ << "?" << data;
+        request_stream << "?" << data;
       }
 
-      request_stream_ << " HTTP/1.1\r\n";
+      request_stream << " HTTP/1.1\r\n";
       break;
     case net::method::POST:
-      request_stream_ << "POST " << std::get<2>(*parsed_url) << std::get<3>(*parsed_url) << " HTTP/1.1\r\n";
+      request_stream << "POST " << std::get<2>(*parsed_url) << std::get<3>(*parsed_url) << " HTTP/1.1\r\n";
       break;
   }
 
-  request_stream_ << "Host: " << std::get<1>(*parsed_url) << "\r\n";
-  request_stream_ << "Accept: */*\r\n";
+  request_stream << "Host: " << std::get<1>(*parsed_url) << "\r\n";
+  request_stream << "Accept: */*\r\n";
 
   if (!header.empty()) {
-    request_stream_ << header << "\r\n";
+    request_stream << header << "\r\n";
   }
 
   if (method == net::method::POST && !data.empty()) {
-    request_stream_ << "Content-Length: " << data.length() << "\r\n";
-    request_stream_ << "Content-Type: application/x-www-form-urlencoded\r\n";
-    request_stream_ << "Connection: close\r\n\r\n";
-    request_stream_ << data << "\r\n";
+    request_stream << "Content-Length: " << data.length() << "\r\n";
+    request_stream << "Content-Type: application/x-www-form-urlencoded\r\n";
+    request_stream << "Connection: close\r\n\r\n";
+    request_stream << data << "\r\n";
   } else {
-    request_stream_ << "Connection: close\r\n\r\n";
+    request_stream << "Connection: close\r\n\r\n";
   }
 }
 
 void client::run() {
   // name resolving
-  boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver_.resolve(*query_);
+  boost::asio::ip::tcp::resolver resolver(*io_service_);
+  auto endpoint_iterator = resolver.resolve(*query_);
 
   // creaate connection
   if (socket_ssl_) {
@@ -76,8 +80,8 @@ void client::run() {
   }
 }
 
-template <typename socket_ptr>
-void client::read_response(socket_ptr socket) {
+template <typename SocketPtr>
+void client::read_response(SocketPtr socket) {
   // send requests
   boost::asio::write(*socket, request_);
 
