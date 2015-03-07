@@ -23,7 +23,7 @@ async_client::async_client(const net::method& method, const std::string& url, co
 
   query_ = std::make_shared<asio::ip::tcp::resolver::query>(std::get<1>(*parsed_url), std::get<0>(*parsed_url));
 
-  std::ostream request_stream(&request_);
+  std::ostream request_stream(&request_buf_);
 
   switch (method) {
     case net::method::GET:
@@ -94,7 +94,7 @@ void async_client::handle_handshake(const boost::system::error_code& error) {
     return;
   }
 
-  asio::async_write(*socket_, request_, boost::bind(&async_client::handle_write, this, asio::placeholders::error));
+  asio::async_write(*socket_, request_buf_, boost::bind(&async_client::handle_write, this, asio::placeholders::error));
 }
 
 void async_client::handle_write(const boost::system::error_code& error) {
@@ -103,7 +103,7 @@ void async_client::handle_write(const boost::system::error_code& error) {
     return;
   }
 
-  asio::async_read_until(*socket_, response_buffer_, "\r\n",
+  asio::async_read_until(*socket_, response_buf_, "\r\n",
                          boost::bind(&async_client::handle_read_status, this, asio::placeholders::error));
 }
 
@@ -113,7 +113,7 @@ void async_client::handle_read_status(const boost::system::error_code& error) {
     return;
   }
 
-  std::istream response_stream(&response_buffer_);
+  std::istream response_stream(&response_buf_);
   response_stream >> response_->http_version >> response_->status_code >> std::ws;
   std::getline(response_stream, response_->status_message);
 
@@ -123,7 +123,7 @@ void async_client::handle_read_status(const boost::system::error_code& error) {
     return;
   }
 
-  asio::async_read_until(*socket_, response_buffer_, "\r\n\r\n",
+  asio::async_read_until(*socket_, response_buf_, "\r\n\r\n",
                          boost::bind(&async_client::handle_read_header, this, asio::placeholders::error));
 }
 
@@ -134,7 +134,7 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
   }
 
   // read response header
-  std::istream response_stream(&response_buffer_);
+  std::istream response_stream(&response_buf_);
   for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
     response_stream >> std::ws;
     std::getline(response_stream, response_->header[s], '\r');
@@ -143,45 +143,45 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
 
   if (response_->header["transfer-encoding"] == "chunked") {
     // chuncked transfer
-    asio::async_read_until(*socket_, response_buffer_, "\r\n",
+    asio::async_read_until(*socket_, response_buf_, "\r\n",
                            boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
   } else if (response_->header.count("Content-Length") != 0) {
     // use content length
     std::size_t content_length = std::stoi(response_->header["Content-Length"]);
 
-    asio::async_read(*socket_, response_buffer_,
-                     asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
+    asio::async_read(*socket_, response_buf_,
+                     asio::transfer_at_least(content_length - asio::buffer_size(response_buf_.data())),
                      boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
   } else if (response_->header.count("content-length") != 0) {
     std::size_t content_length = std::stoi(response_->header["content-length"]);
 
-    asio::async_read(*socket_, response_buffer_,
-                     asio::transfer_at_least(content_length - asio::buffer_size(response_buffer_.data())),
+    asio::async_read(*socket_, response_buf_,
+                     asio::transfer_at_least(content_length - asio::buffer_size(response_buf_.data())),
                      boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
   } else {
     // other (not working now
-    asio::async_read(*socket_, response_buffer_, asio::transfer_all(),
+    asio::async_read(*socket_, response_buf_, asio::transfer_all(),
                      boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
   }
 }
 
 void async_client::handle_read_chunk_size(const boost::system::error_code& error) {
   if (!error) {
-    if (response_buffer_.size() == 0) {
+    if (response_buf_.size() == 0) {
       return;
-    } else if (response_buffer_.size() <= 2) {
-      response_buffer_.consume(response_buffer_.size());
-      asio::async_read_until(*socket_, response_buffer_, "\r\n",
+    } else if (response_buf_.size() <= 2) {
+      response_buf_.consume(response_buf_.size());
+      asio::async_read_until(*socket_, response_buf_, "\r\n",
                              boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
     } else {
       // read chunk size
-      std::size_t chunk_size = std::strtoul(asio::buffer_cast<const char*>(response_buffer_.data()), nullptr, 16);
-      response_buffer_.consume(chunk_size);
+      std::size_t chunk_size = std::strtoul(asio::buffer_cast<const char*>(response_buf_.data()), nullptr, 16);
+      response_buf_.consume(chunk_size);
 
       if (chunk_size > 0) {
         // read chunk
-        asio::async_read(*socket_, response_buffer_,
-                         asio::transfer_at_least(chunk_size - asio::buffer_size(response_buffer_.data())),
+        asio::async_read(*socket_, response_buf_,
+                         asio::transfer_at_least(chunk_size - asio::buffer_size(response_buf_.data())),
                          boost::bind(&async_client::handle_read_chunk_body, this, chunk_size, asio::placeholders::error));
       } else {
         // end
@@ -196,14 +196,14 @@ void async_client::handle_read_chunk_size(const boost::system::error_code& error
 void async_client::handle_read_chunk_body(std::size_t content_length, const boost::system::error_code& error) {
   if (!error) {
     boost::system::error_code ec;
-    asio::read(*socket_, response_buffer_,
-               asio::transfer_at_least((content_length + 2) - asio::buffer_size(response_buffer_.data())), ec);
+    asio::read(*socket_, response_buf_,
+               asio::transfer_at_least((content_length + 2) - asio::buffer_size(response_buf_.data())), ec);
 
-    response_->body.append(asio::buffer_cast<const char*>(response_buffer_.data()), content_length);
-    response_buffer_.consume(content_length + 2);
+    response_->body.append(asio::buffer_cast<const char*>(response_buf_.data()), content_length);
+    response_buf_.consume(content_length + 2);
     handler_(*response_);
 
-    asio::async_read_until(*socket_, response_buffer_, "\r\n",
+    asio::async_read_until(*socket_, response_buf_, "\r\n",
                            boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
     std::cerr << "failed to read chunk: " << error.message() << std::endl;
@@ -212,8 +212,8 @@ void async_client::handle_read_chunk_body(std::size_t content_length, const boos
 
 void async_client::handle_read_content(std::size_t content_length, const boost::system::error_code& error) {
   if (!error) {
-    response_->body.append(asio::buffers_begin(response_buffer_.data()), asio::buffers_end(response_buffer_.data()));
-    response_buffer_.consume(content_length);
+    response_->body.append(asio::buffers_begin(response_buf_.data()), asio::buffers_end(response_buf_.data()));
+    response_buf_.consume(content_length);
     handler_(*response_);
   } else if (error != asio::error::eof) {
     std::cerr << "failed to read content: " << error.message() << std::endl;
@@ -223,12 +223,12 @@ void async_client::handle_read_content(std::size_t content_length, const boost::
 void async_client::handle_read_content_all(const boost::system::error_code& error) {
   if (!error) {
     std::ostringstream tmp;
-    tmp << &response_buffer_;
+    tmp << &response_buf_;
     response_->body = tmp.str();
     handler_(*response_);
 
     // Continue reading remaining data until EOF.
-    asio::async_read(*socket_, response_buffer_, asio::transfer_at_least(1),
+    asio::async_read(*socket_, response_buf_, asio::transfer_at_least(1),
                      boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
   } else if (error != asio::error::eof) {
     std::cerr << "failed to read content: " << error.message() << std::endl;

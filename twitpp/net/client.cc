@@ -28,7 +28,7 @@ client::client(const net::method& method, const std::string& url, const std::str
 
   query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(std::get<1>(*parsed_url), std::get<0>(*parsed_url));
 
-  std::ostream request_stream(&request_);
+  std::ostream request_stream(&request_buf_);
 
   switch (method) {
     case net::method::GET:
@@ -83,13 +83,13 @@ void client::run() {
 template <typename SocketPtr>
 void client::read_response(SocketPtr socket) {
   // send requests
-  boost::asio::write(*socket, request_);
+  boost::asio::write(*socket, request_buf_);
 
   // read status
-  boost::asio::streambuf response;
-  boost::asio::read_until(*socket, response, "\r\n");
+  boost::asio::streambuf response_buf;
+  boost::asio::read_until(*socket, response_buf, "\r\n");
 
-  std::istream response_stream(&response);
+  std::istream response_stream(&response_buf);
   response_stream >> response_->http_version >> response_->status_code >> std::ws;
   std::getline(response_stream, response_->status_message);
 
@@ -98,7 +98,7 @@ void client::read_response(SocketPtr socket) {
   }
 
   // read header
-  boost::asio::read_until(*socket, response, "\r\n\r\n");
+  boost::asio::read_until(*socket, response_buf, "\r\n\r\n");
 
   for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
     response_stream >> std::ws;
@@ -108,9 +108,9 @@ void client::read_response(SocketPtr socket) {
 
   // read until EOF
   boost::system::error_code error;
-  while(boost::asio::read(*socket, response, boost::asio::transfer_all(), error));
-  response_->body.assign(boost::asio::buffers_begin(response.data()), boost::asio::buffers_end(response.data()));
-  response.consume(response.size());
+  while(boost::asio::read(*socket, response_buf, boost::asio::transfer_all(), error));
+  response_->body.assign(boost::asio::buffers_begin(response_buf.data()), boost::asio::buffers_end(response_buf.data()));
+  response_buf.consume(response_buf.size());
 
   if(error != boost::asio::error::eof) {
     throw boost::system::system_error(error);

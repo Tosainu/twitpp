@@ -27,7 +27,7 @@ private:
   std::shared_ptr<boost::asio::io_service> io_service_;
   std::shared_ptr<boost::asio::ip::tcp::resolver::query> query_;
 
-  boost::asio::streambuf request_;
+  boost::asio::streambuf request_buf_;
 
   std::shared_ptr<boost::asio::ip::tcp::socket> socket_;
   std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> socket_ssl_;
