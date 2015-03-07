@@ -159,8 +159,7 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
                      asio::transfer_at_least(content_length - asio::buffer_size(response_buf_.data())),
                      boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
   } else {
-    // other (not working now
-    asio::async_read(*socket_, response_buf_, asio::transfer_all(),
+    asio::async_read(*socket_, response_buf_, asio::transfer_at_least(1),
                      boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
   }
 }
@@ -218,15 +217,14 @@ void async_client::handle_read_content(std::size_t content_length, const boost::
 
 void async_client::handle_read_content_all(const boost::system::error_code& error) {
   if (!error) {
-    std::ostringstream tmp;
-    tmp << &response_buf_;
-    response_->body = tmp.str();
-    handler_(*response_);
+    response_->body.append(asio::buffers_begin(response_buf_.data()), asio::buffers_end(response_buf_.data()));
+    response_buf_.consume(response_buf_.size());
 
-    // Continue reading remaining data until EOF.
     asio::async_read(*socket_, response_buf_, asio::transfer_at_least(1),
                      boost::bind(&async_client::handle_read_content_all, this, asio::placeholders::error));
-  } else if (error != asio::error::eof) {
+  } else if (error == asio::error::eof) {
+    handler_(*response_);
+  } else {
     std::cerr << "failed to read content: " << error.message() << std::endl;
   }
 }
