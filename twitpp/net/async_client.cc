@@ -166,25 +166,20 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
 
 void async_client::handle_read_chunk_size(const boost::system::error_code& error) {
   if (!error) {
-    if (response_buf_.size() == 0) {
-      return;
-    } else if (response_buf_.size() <= 2) {
-      response_buf_.consume(response_buf_.size());
+    auto buffer_size = response_buf_.size();
+
+    if (buffer_size <= 2) {
+      response_buf_.consume(buffer_size);
       asio::async_read_until(*socket_, response_buf_, "\r\n",
                              boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
     } else {
       // read chunk size
       std::size_t chunk_size = std::strtoul(asio::buffer_cast<const char*>(response_buf_.data()), nullptr, 16);
-      response_buf_.consume(chunk_size);
+      response_buf_.consume(buffer_size);
 
       if (chunk_size > 0) {
-        // read chunk
-        asio::async_read(*socket_, response_buf_,
-                         asio::transfer_at_least(chunk_size - asio::buffer_size(response_buf_.data())),
+        asio::async_read(*socket_, response_buf_, asio::transfer_at_least(chunk_size + 2),
                          boost::bind(&async_client::handle_read_chunk_body, this, chunk_size, asio::placeholders::error));
-      } else {
-        // end
-        return;
       }
     }
   } else if (error != asio::error::eof) {
