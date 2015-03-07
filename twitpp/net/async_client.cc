@@ -9,8 +9,7 @@ namespace net {
 namespace asio = boost::asio;
 
 async_client::async_client(const net::method& method, const std::string& url, const std::string& header, const std::string& data)
-    : io_service_(std::make_shared<boost::asio::io_service>()), context_(boost::asio::ssl::context_base::tlsv12),
-      resolver_(*io_service_), request_stream_(&request_), response_(std::make_shared<net::response>()) {
+    : io_service_(std::make_shared<asio::io_service>()), response_(std::make_shared<net::response>()) {
   auto parsed_url = util::url_parser(url);
 
   if (!parsed_url) {
@@ -18,40 +17,43 @@ async_client::async_client(const net::method& method, const std::string& url, co
     return;
   }
 
-  context_.set_verify_mode(boost::asio::ssl::verify_none);
-  socket_ = std::make_shared<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>(*io_service_, context_);
+  asio::ssl::context context(asio::ssl::context_base::tlsv12);
+  context.set_verify_mode(asio::ssl::verify_none);
+  socket_ = std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(*io_service_, context);
 
-  query_ = std::make_shared<boost::asio::ip::tcp::resolver::query>(std::get<1>(*parsed_url), std::get<0>(*parsed_url));
+  query_ = std::make_shared<asio::ip::tcp::resolver::query>(std::get<1>(*parsed_url), std::get<0>(*parsed_url));
+
+  std::ostream request_stream(&request_);
 
   switch (method) {
     case net::method::GET:
-      request_stream_ << "GET " << std::get<2>(*parsed_url);
+      request_stream << "GET " << std::get<2>(*parsed_url);
 
       if (!data.empty()) {
-        request_stream_ << "?" << data;
+        request_stream << "?" << data;
       }
 
-      request_stream_ << " HTTP/1.1\r\n";
+      request_stream << " HTTP/1.1\r\n";
       break;
     case net::method::POST:
-      request_stream_ << "POST " << std::get<2>(*parsed_url) << std::get<3>(*parsed_url) << " HTTP/1.1\r\n";
+      request_stream << "POST " << std::get<2>(*parsed_url) << std::get<3>(*parsed_url) << " HTTP/1.1\r\n";
       break;
   }
 
-  request_stream_ << "Host: " << std::get<1>(*parsed_url) << "\r\n";
-  request_stream_ << "Accept: */*\r\n";
+  request_stream << "Host: " << std::get<1>(*parsed_url) << "\r\n";
+  request_stream << "Accept: */*\r\n";
 
   if (!header.empty()) {
-    request_stream_ << header << "\r\n";
+    request_stream << header << "\r\n";
   }
 
   if (method == net::method::POST && !data.empty()) {
-    request_stream_ << "Content-Length: " << data.length() << "\r\n";
-    request_stream_ << "Content-Type: application/x-www-form-urlencoded\r\n";
-    request_stream_ << "Connection: close\r\n\r\n";
-    request_stream_ << data << "\r\n";
+    request_stream << "Content-Length: " << data.length() << "\r\n";
+    request_stream << "Content-Type: application/x-www-form-urlencoded\r\n";
+    request_stream << "Connection: close\r\n\r\n";
+    request_stream << data << "\r\n";
   } else {
-    request_stream_ << "Connection: close\r\n\r\n";
+    request_stream << "Connection: close\r\n\r\n";
   }
 }
 
@@ -59,7 +61,8 @@ void async_client::run(const response_handler& handler) {
   handler_ = handler;
 
   // name resolving
-  resolver_.async_resolve(
+  asio::ip::tcp::resolver resolver(*io_service_);
+  resolver.async_resolve(
       *query_, boost::bind(&async_client::handle_resolve, this, asio::placeholders::error, asio::placeholders::iterator));
 
   io_service_->run();
@@ -196,7 +199,7 @@ void async_client::handle_read_chunk_body(std::size_t content_length, const boos
     asio::read(*socket_, response_buffer_,
                asio::transfer_at_least((content_length + 2) - asio::buffer_size(response_buffer_.data())), ec);
 
-    response_->body.append(boost::asio::buffer_cast<const char*>(response_buffer_.data()), content_length);
+    response_->body.append(asio::buffer_cast<const char*>(response_buffer_.data()), content_length);
     response_buffer_.consume(content_length + 2);
     handler_(*response_);
 

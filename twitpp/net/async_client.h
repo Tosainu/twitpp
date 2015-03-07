@@ -19,17 +19,12 @@ public:
 
 private:
   std::shared_ptr<boost::asio::io_service> io_service_;
-
-  boost::asio::ssl::context context_;
-
-  boost::asio::ip::tcp::resolver resolver_;
-  std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> socket_;
-
   std::shared_ptr<boost::asio::ip::tcp::resolver::query> query_;
 
   boost::asio::streambuf request_;
-  std::ostream request_stream_;
   boost::asio::streambuf response_buffer_;
+
+  std::shared_ptr<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> socket_;
 
   std::shared_ptr<net::response> response_;
   response_handler handler_;
