@@ -86,6 +86,19 @@ std::string url_encode(const std::string& text) {
   return result.str();
 }
 
+boost::optional<header_t> header_parser(const std::string& header) {
+  using namespace boost::xpressive;
+
+  sregex regex = (s1 = +graph) >> *space >> ':' >> *space >> (s2 = +print) >> *cntrl;
+  smatch res;
+
+  if (regex_search(header, res, regex)) {
+    return std::make_pair(res.str(1), res.str(2));
+  } else {
+    return boost::none;
+  }
+}
+
 boost::optional<url_t> url_parser(const std::string& url) {
   using namespace boost::xpressive;
 

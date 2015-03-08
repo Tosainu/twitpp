@@ -100,10 +100,11 @@ void client::read_response(SocketPtr socket) {
   // read header
   boost::asio::read_until(*socket, response_buf, "\r\n\r\n");
 
-  for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
-    response_stream >> std::ws;
-    std::getline(response_stream, response_->header[s], '\r');
-    response_stream >> std::ws;
+  for (std::string s; std::getline(response_stream, s) && s != "\r";) {
+    auto parsed_header = util::header_parser(s);
+    if (parsed_header) {
+      response_->header.insert(*parsed_header);
+    }
   }
 
   // read until EOF

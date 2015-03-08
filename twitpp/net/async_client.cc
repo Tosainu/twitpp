@@ -135,10 +135,11 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
 
   // read response header
   std::istream response_stream(&response_buf_);
-  for (std::string s; std::getline(response_stream, s, ':') && s[0] != '\r';) {
-    response_stream >> std::ws;
-    std::getline(response_stream, response_->header[s], '\r');
-    response_stream >> std::ws;
+  for (std::string s; std::getline(response_stream, s) && s != "\r";) {
+    auto parsed_header = util::header_parser(s);
+    if (parsed_header) {
+      response_->header.insert(*parsed_header);
+    }
   }
 
   if (response_->header["transfer-encoding"] == "chunked") {
