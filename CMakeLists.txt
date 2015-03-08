@@ -20,13 +20,8 @@ find_package(Threads REQUIRED)
 
 set(CMAKE_USE_PTHREAD_INIT 1)
 
-add_library(${PROJECT_NAME} SHARED
-  twitpp/net/async_client.cc
-  twitpp/net/client.cc
-  twitpp/oauth/account.cc
-  twitpp/oauth/oauth.cc
-  twitpp/util/util.cc
-)
+file(GLOB_RECURSE SOURCES twitpp/*.cc)
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 include_directories(
   ${Boost_INCLUDE_DIRS}
