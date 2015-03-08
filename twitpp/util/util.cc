@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <random>
 #include <boost/xpressive/xpressive.hpp>
 #include <openssl/evp.h>
@@ -86,6 +87,13 @@ std::string url_encode(const std::string& text) {
   return result.str();
 }
 
+std::string to_lower(const std::string& str) {
+  std::string result;
+  std::transform(str.begin(), str.end(), std::back_inserter(result), ::tolower);
+
+  return result;
+}
+
 boost::optional<header_t> header_parser(const std::string& header) {
   using namespace boost::xpressive;
 
@@ -93,7 +101,7 @@ boost::optional<header_t> header_parser(const std::string& header) {
   smatch res;
 
   if (regex_search(header, res, regex)) {
-    return std::make_pair(res.str(1), res.str(2));
+    return std::make_pair(to_lower(res.str(1)), res.str(2));
   } else {
     return boost::none;
   }

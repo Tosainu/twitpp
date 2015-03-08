@@ -17,6 +17,8 @@ std::string random_str(unsigned int length);
 
 std::string url_encode(const std::string& text);
 
+std::string to_lower(const std::string& str);
+
 using header_t = std::pair<std::string, std::string>;
 boost::optional<header_t> header_parser(const std::string& header);
 

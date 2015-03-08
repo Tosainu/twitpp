@@ -146,18 +146,11 @@ void async_client::handle_read_header(const boost::system::error_code& error) {
     // chuncked transfer
     asio::async_read_until(*socket_, response_buf_, "\r\n",
                            boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));
-  } else if (response_->header.count("Content-Length") != 0) {
-    // use content length
-    std::size_t content_length = std::stoi(response_->header["Content-Length"]);
-
-    asio::async_read(*socket_, response_buf_,
-                     asio::transfer_at_least(content_length - asio::buffer_size(response_buf_.data())),
-                     boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
   } else if (response_->header.count("content-length") != 0) {
+    // use content length
     std::size_t content_length = std::stoi(response_->header["content-length"]);
 
-    asio::async_read(*socket_, response_buf_,
-                     asio::transfer_at_least(content_length - asio::buffer_size(response_buf_.data())),
+    asio::async_read(*socket_, response_buf_, asio::transfer_at_least(content_length),
                      boost::bind(&async_client::handle_read_content, this, content_length, asio::placeholders::error));
   } else {
     asio::async_read(*socket_, response_buf_, asio::transfer_at_least(1),
