@@ -26,13 +26,11 @@ $ sudo make install
 twitpp::oauth::account account("CONSUMER", "CONSUMER_SECRET");
 
 // get authorize_url
-account.get_authorize_url()
+account.get_authorize_url();
 std::cout << account.authorize_url() << std::endl;
 
-// std::string pin = "PIN";
-
 // get oauth token
-account.get_oauth_token(pin)
+account.get_oauth_token("PIN")
 
 std::cout << "consumer_key:    " << account.consumer_key()       << std::endl;
 std::cout << "consumer_secret: " << account.consumer_secret()    << std::endl;
@@ -45,7 +43,8 @@ std::cout << "oauth_secret:    " << account.oauth_token_secret() << std::endl;
 ```cpp
 twitpp::oauth::client oauth(twitpp::oauth::account("CK", "CS", "AT", "AS"));
 
-auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json", {{"status", "Hello World!!"}});
+auto res = oauth.post("https://api.twitter.com/1.1/statuses/update.json",
+                      {{"status", "Hello World!!"}});
 std::cout << res.body << std::endl;
 ```
 
@@ -54,7 +53,8 @@ std::cout << res.body << std::endl;
 ```cpp
 twitpp::oauth::client oauth(twitpp::oauth::account("CK", "CS", "AT", "AS"));
 
-oauth.stream_get("https://userstream.twitter.com/1.1/user.json", [](twitpp::net::response& response) {
+oauth.stream_get("https://userstream.twitter.com/1.1/user.json",
+                 [](twitpp::net::response& response) {
   std::cout << response.body << std::endl;
   response.body.clear();
 });
