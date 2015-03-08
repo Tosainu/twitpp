@@ -8,7 +8,7 @@ namespace twitpp {
 namespace net {
 
 client::client(const net::method& method, const std::string& url, const std::string& header, const std::string& data)
-  : io_service_(std::make_shared<boost::asio::io_service>()), response_(std::make_shared<net::response>()) {
+    : io_service_(std::make_shared<boost::asio::io_service>()), response_(std::make_shared<net::response>()) {
   auto parsed_url = util::url_parser(url);
 
   if (!parsed_url) {
@@ -93,7 +93,7 @@ void client::read_response(SocketPtr socket) {
   response_stream >> response_->http_version >> response_->status_code >> std::ws;
   std::getline(response_stream, response_->status_message);
 
-  if(!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
+  if (!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
     throw std::runtime_error("invalid response");
   }
 
@@ -109,11 +109,11 @@ void client::read_response(SocketPtr socket) {
 
   // read until EOF
   boost::system::error_code error;
-  while(boost::asio::read(*socket, response_buf, boost::asio::transfer_all(), error));
+  while (boost::asio::read(*socket, response_buf, boost::asio::transfer_all(), error));
   response_->body.assign(boost::asio::buffers_begin(response_buf.data()), boost::asio::buffers_end(response_buf.data()));
   response_buf.consume(response_buf.size());
 
-  if(error != boost::asio::error::eof) {
+  if (error != boost::asio::error::eof) {
     throw boost::system::system_error(error);
   }
 }

@@ -18,9 +18,7 @@ class client {
 
 public:
   template <typename T>
-  client(T&& ac)
-      : account_{std::forward<T>(ac)} {
-  }
+  client(T&& ac) : account_{std::forward<T>(ac)} {}
 
   net::response get(const std::string& url, const param_t& param = param_t{});
   net::response post(const std::string& url, const param_t& param = param_t{});
@@ -42,7 +40,7 @@ private:
   inline param_t make_auth_param();
 };
 
-}  // namespace oauth
-}  // namespace twitpp
+} // namespace oauth
+} // namespace twitpp
 
 #endif

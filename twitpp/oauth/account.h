@@ -9,8 +9,7 @@ namespace oauth {
 
 class account {
 public:
-  account(const std::string& ck, const std::string& cs,
-          const std::string& ot = "", const std::string& os = "");
+  account(const std::string& ck, const std::string& cs, const std::string& ot = "", const std::string& os = "");
 
   int get_authorize_url();
   int get_oauth_token(const std::string& pin);
