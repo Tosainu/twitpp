@@ -4,9 +4,9 @@ A Twitter Library for C++11.
 
 ## Requirement
 
-* GCC 4.8.0+ or Clang 3.4+
+* GCC 4.8.0+, Clang 3.4+, Apple LLVM 6.0+
 * Boost C++ Libraries 1.55.0+
-* OpenSSL
+* OpenSSL 1.0.1+
 * CMake 2.8.0+
 
 ## Install
