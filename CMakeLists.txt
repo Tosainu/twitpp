@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O3")
 
 
 find_package(Boost 1.55.0 COMPONENTS system REQUIRED)
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL 1.0.1 REQUIRED)
 find_package(Threads REQUIRED)
 
 set(CMAKE_USE_PTHREAD_INIT 1)
