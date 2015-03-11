@@ -9,15 +9,11 @@
 namespace twitpp {
 namespace util {
 
-std::string base64_encode(const unsigned char* data, std::size_t length);
-
 std::string hmac_sha1_encode(const std::string& key, const std::string& data);
 
-std::string random_str(unsigned int length);
+std::string random_str(const std::size_t& length);
 
-std::string url_encode(const std::string& text);
-
-std::string to_lower(const std::string& str);
+std::string url_encode(const std::string& str);
 
 using header_t = std::pair<std::string, std::string>;
 boost::optional<header_t> header_parser(const std::string& header);

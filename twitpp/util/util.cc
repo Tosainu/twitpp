@@ -9,11 +9,15 @@
 namespace twitpp {
 namespace util {
 
-std::string base64_encode(const unsigned char* data, unsigned int length) {
-  const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const static char charset[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+                               'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+                               'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+
+std::string base64_encode(const unsigned char* data, const unsigned int& length) {
   std::string result;
 
-  for (unsigned int i = 0; i < length; ++i) {
+  for (auto i = 0u; i < length; ++i) {
     switch (i % 3) {
       case 0:
         result.push_back(charset[(data[i] & 0xFC) >> 2]);
@@ -45,6 +49,13 @@ std::string base64_encode(const unsigned char* data, unsigned int length) {
   return result;
 }
 
+std::string to_lower(const std::string& str) {
+  std::string result(str.length(), 0);
+  std::transform(str.begin(), str.end(), result.begin(), ::tolower);
+
+  return result;
+}
+
 std::string hmac_sha1_encode(const std::string& key, const std::string& data) {
   unsigned char result[SHA_DIGEST_LENGTH + 1];
   unsigned int length;
@@ -57,26 +68,25 @@ std::string hmac_sha1_encode(const std::string& key, const std::string& data) {
   return base64_encode(result, length);
 }
 
-std::string random_str(unsigned int length) {
-  const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  std::string result;
+std::string random_str(const std::size_t& length) {
+  std::string result(length, 0);
 
   std::mt19937 mt{std::random_device()()};
   std::uniform_int_distribution<unsigned int> random(0, 61);
 
-  for (unsigned int cnt = 0; cnt < length; ++cnt) {
-    result.append(1, charset[random(mt)]);
-  }
+  std::generate_n(result.begin(), length, [&] {
+    return charset[random(mt)];
+  });
 
   return result;
 }
 
-std::string url_encode(const std::string& text) {
+std::string url_encode(const std::string& str) {
   std::ostringstream result;
   result.fill('0');
   result << std::hex << std::uppercase;
 
-  for (auto&& c : text) {
+  for (auto&& c : str) {
     if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
       result << c;
     } else {
@@ -87,17 +97,10 @@ std::string url_encode(const std::string& text) {
   return result.str();
 }
 
-std::string to_lower(const std::string& str) {
-  std::string result;
-  std::transform(str.begin(), str.end(), std::back_inserter(result), ::tolower);
-
-  return result;
-}
-
 boost::optional<header_t> header_parser(const std::string& header) {
   using namespace boost::xpressive;
 
-  sregex regex = (s1 = +graph) >> *space >> ':' >> *space >> (s2 = +print) >> *cntrl;
+  const static sregex regex = (s1 = +graph) >> *space >> ':' >> *space >> (s2 = +print) >> *cntrl;
   smatch res;
 
   if (regex_search(header, res, regex)) {
@@ -110,7 +113,7 @@ boost::optional<header_t> header_parser(const std::string& header) {
 boost::optional<url_t> url_parser(const std::string& url) {
   using namespace boost::xpressive;
 
-  sregex regex = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *~(set = '?')) >> (s4 = *_);
+  const static sregex regex = (s1 = +alpha) >> "://" >> (s2 = +(_w | '.')) >> (s3 = *~(set = '?')) >> (s4 = *_);
   smatch res;
 
   if (regex_search(url, res, regex)) {
