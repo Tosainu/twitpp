@@ -35,13 +35,12 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE       DESTINATION lib
-  LIBRARY       DESTINATION lib
+  LIBRARY         DESTINATION lib
 )
 
 install(DIRECTORY twitpp/
-  DESTINATION include/${PROJECT_NAME}
-  FILES_MATCHING PATTERN "*.h"
+  DESTINATION     include/${PROJECT_NAME}
+  FILES_MATCHING  PATTERN "*.h"
 )
 
 add_subdirectory(example)
