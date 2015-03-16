@@ -1,5 +1,5 @@
-#ifndef TWITPP_NET_RESPONSE_H
-#define TWITPP_NET_RESPONSE_H
+#if !defined TWITPP_NET_RESPONSE_HH
+#define      TWITPP_NET_RESPONSE_HH
 
 #include <unordered_map>
 
@@ -19,4 +19,4 @@ using response_handler = std::function<void(response&)>;
 } // namespace net
 } // namespace twitpp
 
-#endif
+#endif // TWITPP_NET_RESPONSE_HH

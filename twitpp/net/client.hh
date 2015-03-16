@@ -1,5 +1,5 @@
-#ifndef TWITPP_NET_CLIENT_H
-#define TWITPP_NET_CLIENT_H
+#if !defined TWITPP_NET_CLIENT_HH
+#define      TWITPP_NET_CLIENT_HH
 
 #include <map>
 #include <memory>
@@ -38,4 +38,4 @@ private:
 } // namespace net
 } // namespace twitpp
 
-#endif
+#endif // TWITPP_NET_CLIENT_HH

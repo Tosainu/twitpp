@@ -1,5 +1,5 @@
-#ifndef TWITPP_NET_ASYNC_CLIENT_H
-#define TWITPP_NET_ASYNC_CLIENT_H
+#if !defined TWITPP_NET_ASYNC_CLIENT_HH
+#define      TWITPP_NET_ASYNC_CLIENT_HH
 
 #include <string>
 #include <functional>
@@ -44,4 +44,4 @@ private:
 } // namespace net
 } // namespace twitpp
 
-#endif
+#endif // TWITPP_NET_ASYNC_CLIENT_HH
