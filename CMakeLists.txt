@@ -40,7 +40,7 @@ install(TARGETS ${PROJECT_NAME}
 
 install(DIRECTORY twitpp/
   DESTINATION     include/${PROJECT_NAME}
-  FILES_MATCHING  PATTERN "*.h"
+  FILES_MATCHING  PATTERN "*.hh"
 )
 
 add_subdirectory(example)

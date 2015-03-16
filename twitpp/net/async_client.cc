@@ -1,7 +1,7 @@
 #include <iostream>
 #include <boost/bind.hpp>
-#include "../util/util.h"
-#include "async_client.h"
+#include "../util/util.hh"
+#include "async_client.hh"
 
 namespace twitpp {
 namespace net {

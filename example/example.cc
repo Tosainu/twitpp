@@ -1,5 +1,5 @@
 #include <iostream>
-#include <twitpp/twitpp.h>
+#include <twitpp/twitpp.hh>
 
 auto main() -> int {
   // set consumer key
