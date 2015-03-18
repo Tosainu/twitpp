@@ -99,7 +99,7 @@ void client::stream_request(net::method method, const std::string& url, const pa
 std::string client::make_query_str(const param_t& param) {
   std::string s;
 
-  for (auto&& p : param) {
+  for (const auto& p : param) {
     s.append(p.first + "=" + util::url_encode(p.second) + "&");
   };
 
@@ -109,7 +109,7 @@ std::string client::make_query_str(const param_t& param) {
 std::string client::make_auth_header(const param_t& param) {
   std::string s("Authorization: OAuth ");
 
-  for (auto&& p : param) {
+  for (const auto& p : param) {
     s.append(p.first + "=\"" + util::url_encode(p.second) + "\", ");
   };
 

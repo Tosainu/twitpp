@@ -86,7 +86,7 @@ std::string url_encode(const std::string& str) {
   result.fill('0');
   result << std::hex << std::uppercase;
 
-  for (auto&& c : str) {
+  for (const auto& c : str) {
     if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
       result << c;
     } else {

@@ -113,7 +113,7 @@ std::string account::oauth_token_secret() const {
 std::string account::make_query_str(const std::map<std::string, std::string>& param) {
   std::string s;
 
-  for (auto&& p : param) {
+  for (const auto& p : param) {
     s.append(p.first + "=" + util::url_encode(p.second) + "&");
   };
 
@@ -123,7 +123,7 @@ std::string account::make_query_str(const std::map<std::string, std::string>& pa
 std::string account::make_auth_header(const std::map<std::string, std::string>& param) {
   std::string s("Authorization: OAuth ");
 
-  for (auto&& p : param) {
+  for (const auto& p : param) {
     s.append(p.first + "=\"" + util::url_encode(p.second) + "\", ");
   };
 
