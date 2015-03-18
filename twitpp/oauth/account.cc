@@ -115,7 +115,7 @@ std::string account::make_query_str(const std::map<std::string, std::string>& pa
 
   for (const auto& p : param) {
     s.append(p.first + "=" + util::url_encode(p.second) + "&");
-  };
+  }
 
   return s.erase(s.length() - 1);
 }
@@ -125,7 +125,7 @@ std::string account::make_auth_header(const std::map<std::string, std::string>& 
 
   for (const auto& p : param) {
     s.append(p.first + "=\"" + util::url_encode(p.second) + "\", ");
-  };
+  }
 
   return s.erase(s.length() - 2);
 }

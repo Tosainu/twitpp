@@ -101,7 +101,7 @@ std::string client::make_query_str(const param_t& param) {
 
   for (const auto& p : param) {
     s.append(p.first + "=" + util::url_encode(p.second) + "&");
-  };
+  }
 
   return s.erase(s.length() - 1);
 }
@@ -111,7 +111,7 @@ std::string client::make_auth_header(const param_t& param) {
 
   for (const auto& p : param) {
     s.append(p.first + "=\"" + util::url_encode(p.second) + "\", ");
-  };
+  }
 
   return s.erase(s.length() - 2);
 }
