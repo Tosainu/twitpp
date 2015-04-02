@@ -118,7 +118,7 @@ void async_client::handle_read_status(const boost::system::error_code& error) {
   std::getline(response_stream, response_->status_message);
 
   // check response
-  if (!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
+  if (!response_stream || response_->http_version.compare(0, 5, "HTTP/")) {
     std::cerr << "error: invalid response" << std::endl;
     return;
   }

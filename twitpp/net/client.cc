@@ -93,7 +93,7 @@ void client::read_response(SocketPtr socket) {
   response_stream >> response_->http_version >> response_->status_code >> std::ws;
   std::getline(response_stream, response_->status_message);
 
-  if (!response_stream || response_->http_version.substr(0, 5) != "HTTP/") {
+  if (!response_stream || response_->http_version.compare(0, 5, "HTTP/")) {
     throw std::runtime_error("invalid response");
   }
 
