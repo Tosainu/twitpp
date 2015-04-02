@@ -56,7 +56,6 @@ twitpp::oauth::client oauth(twitpp::oauth::account("CK", "CS", "AT", "AS"));
 oauth.stream_get("https://userstream.twitter.com/1.1/user.json",
                  [](twitpp::net::response& response) {
   std::cout << response.body << std::endl;
-  response.body.clear();
 });
 ```
 

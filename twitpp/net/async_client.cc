@@ -183,9 +183,15 @@ void async_client::handle_read_chunk_size(const boost::system::error_code& error
 
 void async_client::handle_read_chunk_body(std::size_t content_length, const boost::system::error_code& error) {
   if (!error) {
-    response_->body.append(asio::buffer_cast<const char*>(response_buf_.data()), content_length);
+    if (content_length > 2) {
+      response_->body.append(asio::buffer_cast<const char*>(response_buf_.data()), content_length);
+
+      if (response_->body.compare(response_->body.length() - 2, 2, "\r\n") == 0) {
+        handler_(*response_);
+        response_->body.clear();
+      }
+    }
     response_buf_.consume(content_length + 2);
-    handler_(*response_);
 
     asio::async_read_until(*socket_, response_buf_, "\r\n",
                            boost::bind(&async_client::handle_read_chunk_size, this, asio::placeholders::error));

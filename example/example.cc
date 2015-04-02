@@ -45,7 +45,6 @@ auto main() -> int {
       }
 
       std::cout << response.body << std::endl;
-      response.body.clear();
     });
   } catch (std::exception& e) {
     std::cerr << "An exception occurred: " << e.what() << std::endl;
