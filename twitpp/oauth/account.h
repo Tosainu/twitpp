@@ -1,5 +1,5 @@
-#if !defined TWITPP_OAUTH_ACCOUNT_HH
-#define      TWITPP_OAUTH_ACCOUNT_HH
+#if !defined TWITPP_OAUTH_ACCOUNT_H
+#define      TWITPP_OAUTH_ACCOUNT_H
 
 #include <map>
 #include <string>
@@ -38,4 +38,4 @@ private:
 } // namespace oauth
 } // namespace twitpp
 
-#endif // TWITPP_OAUTH_ACCOUNT_HH
+#endif // TWITPP_OAUTH_ACCOUNT_H

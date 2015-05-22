@@ -1,5 +1,5 @@
-#if !defined TWITPP_NET_METHOD_HH
-#define      TWITPP_NET_METHOD_HH
+#if !defined TWITPP_NET_METHOD_H
+#define      TWITPP_NET_METHOD_H
 
 namespace twitpp {
 namespace net {
@@ -12,4 +12,4 @@ enum class method {
 } // namespace net
 } // namespace twitpp
 
-#endif // TWITPP_NET_METHOD_HH
+#endif // TWITPP_NET_METHOD_H

@@ -1,5 +1,5 @@
-#if !defined TWITPP_UTILITY_HH
-#define      TWITPP_UTILITY_HH
+#if !defined TWITPP_UTILITY_H
+#define      TWITPP_UTILITY_H
 
 #include <string>
 #include <tuple>
@@ -24,4 +24,4 @@ boost::optional<url_t> url_parser(const std::string& url);
 } // namespace util
 } // namespace twitpp
 
-#endif // TWITPP_UTILITY_HH
+#endif // TWITPP_UTILITY_H

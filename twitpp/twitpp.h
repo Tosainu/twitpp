@@ -1,7 +1,7 @@
-#if !defined TWITPP_HH
-#define      TWITPP_HH
+#if !defined TWITPP_H
+#define      TWITPP_H
 
 #include <twitpp/oauth/oauth.h>
 #include <twitpp/oauth/account.h>
 
-#endif // TWITPP_HH
+#endif // TWITPP_H
