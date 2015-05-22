@@ -1,8 +1,8 @@
 #include <ctime>
-#include "../net/async_client.hh"
-#include "../net/client.hh"
-#include "../util/util.hh"
-#include "oauth.hh"
+#include "../net/async_client.h"
+#include "../net/client.h"
+#include "../util/util.h"
+#include "oauth.h"
 
 namespace twitpp {
 namespace oauth {

@@ -6,8 +6,8 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include "method.hh"
-#include "response.hh"
+#include "method.h"
+#include "response.h"
 
 namespace twitpp {
 namespace net {

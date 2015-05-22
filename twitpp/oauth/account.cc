@@ -1,8 +1,8 @@
 #include <ctime>
 #include <boost/xpressive/xpressive.hpp>
-#include "../net/client.hh"
-#include "../util/util.hh"
-#include "account.hh"
+#include "../net/client.h"
+#include "../util/util.h"
+#include "account.h"
 
 namespace twitpp {
 namespace oauth {

@@ -4,7 +4,7 @@
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
-#include "util.hh"
+#include "util.h"
 
 namespace twitpp {
 namespace util {

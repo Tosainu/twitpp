@@ -1,8 +1,8 @@
 #include <ostream>
 #include <stdexcept>
 #include <tuple>
-#include "../util/util.hh"
-#include "client.hh"
+#include "../util/util.h"
+#include "client.h"
 
 namespace twitpp {
 namespace net {

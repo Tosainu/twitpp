@@ -4,9 +4,9 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "../net/method.hh"
-#include "../net/response.hh"
-#include "account.hh"
+#include "../net/method.h"
+#include "../net/response.h"
+#include "account.h"
 
 namespace twitpp {
 namespace oauth {
