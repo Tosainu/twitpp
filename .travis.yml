@@ -10,6 +10,7 @@ addons:
   apt:
     sources:
       - boost-latest
+      - kalakris-cmake
       - ubuntu-toolchain-r-test
     packages:
       - cmake
