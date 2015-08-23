@@ -12,6 +12,7 @@ addons:
       - cmake
       - g++-4.8
       - libboost1.55-all-dev
+      - libssl-dev
 
 script:
   - cmake --version
