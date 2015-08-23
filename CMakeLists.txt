@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 project(twitpp)
 
 add_definitions(-std=c++11 -Wall -Wextra)
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O3")
 
 if(APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "-Wl")
@@ -10,9 +12,6 @@ if(APPLE)
 else()
    set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-z,now,-z,relro")
 endif()
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O3")
-
 
 find_package(Boost 1.55.0 COMPONENTS system REQUIRED)
 find_package(OpenSSL 1.0.1 REQUIRED)
@@ -20,7 +19,7 @@ find_package(Threads REQUIRED)
 
 set(CMAKE_USE_PTHREAD_INIT 1)
 
-file(GLOB_RECURSE SOURCES twitpp/*.cc)
+file(GLOB_RECURSE SOURCES src/twitpp/*.cc)
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 include_directories(
@@ -38,7 +37,7 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY         DESTINATION lib
 )
 
-install(DIRECTORY twitpp/
+install(DIRECTORY src/twitpp/
   DESTINATION     include/${PROJECT_NAME}
   FILES_MATCHING  PATTERN "*.h"
 )
