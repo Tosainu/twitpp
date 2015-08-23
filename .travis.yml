@@ -20,7 +20,7 @@ addons:
       - openssl
 
 script:
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" && $CXX --version; fi
+  - if [ "$CXX" = "g++" ]; then export CC="gcc-4.8" && export CXX="g++-4.8" && $CC --version; fi
   - cmake --version
   - mkdir -p build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=Release
