@@ -16,7 +16,7 @@ addons:
       - cmake
       - g++-4.8
       - libboost1.55-dev
-      - libboost-system1.5.5-dev
+      - libboost-system1.55-dev
       - libssl-dev
       - openssl
 
