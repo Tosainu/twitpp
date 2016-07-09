@@ -1,5 +1,4 @@
 #include <ctime>
-#include <boost/xpressive/xpressive.hpp>
 #include "../net/client.h"
 #include "../util/util.h"
 #include "account.h"
@@ -28,22 +27,18 @@ int account::get_authorize_url() {
     net::client client(net::method::POST, "https://api.twitter.com/oauth/request_token", make_auth_header(auth_param), "");
     client.run();
 
-    using namespace boost::xpressive;
+    auto token = util::parse_query_str(client.response().body);
 
-    sregex regex_token = "oauth_token=" >> (s1 = +_w) >> '&'
-                      >> "oauth_token_secret=" >> (s2 = +_w) >> '&'
-                      >> "oauth_callback_confirmed=" >> (s3 = +_w);
-
-    smatch token;
-    if (regex_match(client.response().body, token, regex_token)) {
-      oauth_token_.assign(token.str(1));
-      oauth_token_secret_.assign(token.str(2));
-      authorize_url_.assign("https://api.twitter.com/oauth/authorize\?oauth_token=" + token.str(1));
-      return 0;
-    } else {
+    if (!token.count("oauth_token") || !token.count("oauth_token_secret")) {
       authorize_url_.clear();
       return -1;
     }
+
+    oauth_token_        = token["oauth_token"];
+    oauth_token_secret_ = token["oauth_token_secret"];
+    authorize_url_      = "https://api.twitter.com/oauth/authorize\?oauth_token=" + oauth_token_;
+
+    return 0;
   } catch (std::exception& e) {
     throw;
   }
@@ -68,23 +63,18 @@ int account::get_oauth_token(const std::string& pin) {
     net::client client(net::method::POST, "https://api.twitter.com/oauth/access_token", make_auth_header(auth_param), "");
     client.run();
 
-    using namespace boost::xpressive;
+    auto token = util::parse_query_str(client.response().body);
 
-    sregex regex_token = "oauth_token=" >> (s1 = +set['-' | alnum]) >> '&'
-                      >> "oauth_token_secret=" >> (s2 = +_w) >> '&'
-                      >> "user_id=" >> (s3 = +_w) >> '&'
-                      >> "screen_name=" >> (s4 = +_w);
-
-    smatch token;
-    if (regex_match(client.response().body, token, regex_token)) {
-      oauth_token_.assign(token.str(1));
-      oauth_token_secret_.assign(token.str(2));
-      return 0;
-    } else {
+    if (!token.count("oauth_token") || !token.count("oauth_token_secret")) {
       oauth_token_.clear();
       oauth_token_secret_.clear();
       return -1;
     }
+
+    oauth_token_        = token["oauth_token"];
+    oauth_token_secret_ = token["oauth_token_secret"];
+
+    return 0;
   } catch (std::exception& e) {
     throw;
   }

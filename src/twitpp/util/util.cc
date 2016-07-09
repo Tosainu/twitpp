@@ -5,6 +5,7 @@
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 #include "util.h"
+#include "query_parser.h"
 
 namespace twitpp {
 namespace util {
@@ -121,6 +122,12 @@ boost::optional<url_t> url_parser(const std::string& url) {
   } else {
     return boost::none;
   }
+}
+
+std::unordered_map<std::string, std::string> parse_query_str(const std::string& str) {
+  std::unordered_map<std::string, std::string> res{};
+  qi::parse(str.begin(), str.end(), query_parser<std::string>(), res);
+  return res;
 }
 
 } // namespace util

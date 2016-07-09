@@ -3,6 +3,7 @@
 
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <utility>
 #include <boost/optional.hpp>
 
@@ -20,6 +21,8 @@ boost::optional<header_t> header_parser(const std::string& header);
 
 using url_t = std::tuple<std::string, std::string, std::string, std::string>;
 boost::optional<url_t> url_parser(const std::string& url);
+
+std::unordered_map<std::string, std::string> parse_query_str(const std::string& str);
 
 } // namespace util
 } // namespace twitpp
